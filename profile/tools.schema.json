@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/m-dev-tools/.github/blob/main/profile/tools.schema.json",
+  "title": "m-dev-tools org catalog",
+  "description": "Validation contract for .github/profile/tools.json, the AI-readable catalog for the m-dev-tools organization.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "kind",
+    "description",
+    "org",
+    "tools",
+    "task_index",
+    "workflow",
+    "discovery_protocol"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+$"
+    },
+    "kind": {
+      "const": "m-dev-tools.org-catalog"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "org": {
+      "$ref": "#/$defs/org"
+    },
+    "tools": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/tool"
+      }
+    },
+    "task_index": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": true
+    },
+    "workflow": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/workflow"
+      }
+    },
+    "discovery_protocol": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "anyOf": [
+          { "type": "string" },
+          {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        ]
+      }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "org": {
+      "type": "object",
+      "required": ["name", "url", "tagline"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "tagline": {
+          "type": "string",
+          "minLength": 1
+        },
+        "license_default": {
+          "type": "string"
+        },
+        "license_exceptions": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "first_principles": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "tool": {
+      "type": "object",
+      "required": ["repo", "role"],
+      "properties": {
+        "repo": {
+          "type": "string",
+          "format": "uri"
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        },
+        "license": {
+          "type": "string"
+        },
+        "entry_point": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "consumes": {
+          "$ref": "#/$defs/stringList"
+        },
+        "consumed_by": {
+          "$ref": "#/$defs/stringList"
+        },
+        "docs": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "subcommands": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "machine_readable": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "modules": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "workflow": {
+      "type": "object",
+      "required": ["description", "steps"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["n", "action"],
+            "properties": {
+              "n": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "phase": {
+                "type": "string"
+              },
+              "action": {
+                "type": "string",
+                "minLength": 1
+              },
+              "command": {
+                "type": "string"
+              },
+              "tool": {
+                "type": "string"
+              },
+              "tools": {
+                "$ref": "#/$defs/stringList"
+              },
+              "see_also": {
+                "$ref": "#/$defs/stringList"
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "stringList": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

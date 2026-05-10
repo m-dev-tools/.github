@@ -1,4 +1,5 @@
 {
+  "$schema": "tools.schema.json",
   "schema_version": "1",
   "kind": "m-dev-tools.org-catalog",
   "description": "Machine-readable cross-link catalog for the m-dev-tools GitHub organization. Authoritative map from user intent (task_index) to repo + tool + command (tools). Designed to be the first file an AI agent reads after llms.txt when asked to build an M (MUMPS) application using the m-dev-tools stack.",
@@ -337,11 +338,17 @@
 
   "discovery_protocol": {
     "_comment": "How an AI agent should consume this catalog when given a fresh user request.",
-    "step_1_read":   ["llms.txt (when present)", "this file (tools.json)"],
-    "step_2_match":  "Map user intent to one or more task_index keys (try fuzzy keyword match against the `intent` strings).",
-    "step_3_resolve": "For each match, follow `primary` (and optionally `see_also`) into the `tools` map for the canonical repo + URL.",
-    "step_4_load":   "Fetch the per-tool `manifest` / `machine_readable` URL when available — those are the ground truth for symbol-level docs (signatures, params, examples).",
-    "step_5_compose": "Use the `workflow.tdd_inner_loop` step list to structure the build — never skip the RED step (write the failing test first).",
-    "step_6_verify": "Cite manifest URLs and rule_ids in code generation; do not paraphrase. If a STD* function is not in the manifest, do not invent one — propose a contribution to m-stdlib first."
+    "step_1_read": [
+      "llms.txt — human-sized AI entrypoint and priority reading order",
+      "tools.json — this machine-readable org catalog",
+      "tools.schema.json — validation contract for this catalog"
+    ],
+    "step_2_match_intent": "Map the user's plain-English request to one or more task_index keys. Prefer exact keys first, then fuzzy keyword match against each `intent` string.",
+    "step_3_resolve_tools": "For each matched task, follow `primary` and `see_also` references into the `tools` map. Treat `repo`, `docs`, `subcommands`, `machine_readable`, and `modules` as routing metadata.",
+    "step_4_load_local_context": "Before changing a repo, read that repo's README plus CLAUDE.md or AGENTS.md when present. Repo-local instructions override org-level generalities.",
+    "step_5_load_manifests": "For symbol-level work, fetch the relevant manifest or machine_readable URL. Use m-stdlib's manifest for STD* APIs and m-standard's grammar/tables for language semantics.",
+    "step_6_compose_workflow": "Use `workflow.tdd_inner_loop` for new application work: scaffold, write failing test, implement, run test, fmt, lint, coverage, CI.",
+    "step_7_verify": "Run the nearest available toolchain checks (`m test`, `m fmt --check`, `m lint`, `m coverage`, `m doctor`) before declaring completion.",
+    "step_8_do_not_invent": "If a requested STD* API, m-cli command, lint rule, or language token is absent from the relevant manifest/catalog, do not fabricate it. State the gap and route the addition to the owning repo."
   }
 }
