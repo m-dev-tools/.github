@@ -24,8 +24,8 @@ state.
 | E1 | done | TIER_1 production URLs pinned in `profile/build/phase0-smoke.py`. |
 | E2 | done | `profile/build/phase0-smoke.py` written; reuses `validate-repo-meta.py`'s inline-validation fallback. |
 | E3 | done | `make phase0-smoke` target in `.github/Makefile`; supports `URLS=…` override for dry-runs. |
-| E4 | partial | Dry-run against feature branches: 2/3 pass (m-stdlib ✓, m-standard ✓, m-cli ✗ — see follow-up #1). Full pass against `main` URLs blocked on PR merges. |
-| E5 | **todo** | Commit + push Track E artifacts (status doc + smoke script + Makefile target) once main is unblocked. |
+| E4 | done (dry-run) | **3/3 PASS** against feature-branch URLs (m-stdlib ✓, m-standard ✓, m-cli ✓ after `aa52ae8`). Full pass against `main` URLs blocked on PR merges. |
+| E5 | done | Track E artifacts (status doc + smoke script + Makefile target) committed at `.github` `7f60dcd`. |
 
 ## Resolved follow-ups
 
@@ -40,17 +40,8 @@ state.
 
 ## Outstanding follow-ups
 
-1. **m-cli manifest paths inconsistent with the plan.** `m-cli`'s
-   `dist/repo.meta.json` uses bare filenames (`"commands": "commands.json"`)
-   while plan §5 D8 specifies `dist/commands.json` and the validator's
-   new repo-root resolution requires the `dist/` prefix. Fix in the
-   `phase0-D` branch before opening the PR:
-   ```json
-   "commands":   "dist/commands.json",
-   "lint_rules": "dist/lint-rules.json",
-   "fmt_rules":  "dist/fmt-rules.json"
-   ```
-   After this, E4's smoke dry-run will be 3/3 against feature-branch URLs.
+1. ~~**m-cli manifest paths.**~~ Resolved on `phase0-D` at `aa52ae8`
+   (m-cli). Smoke dry-run now 3/3.
 
 2. **B/C check-manifest target may pass `--no-resolve`** as a leftover
    workaround. With the validator fixed, those targets can drop the
@@ -79,8 +70,13 @@ state.
 
 ## Resume points
 
-- **Commit + push the .github path-resolution fix** (this session's work).
-- **Fix m-cli manifest paths** in `phase0-D` branch.
-- **Re-run E4 dry-run** after m-cli fix; should be 3/3.
+All technical work is done. Remaining steps are cross-repo coordination:
+
 - **Open PRs for B, C, D** (`gh pr create` in each repo).
-- **E5:** commit + push the Track E artifacts once PRs merge to main.
+- **Merge PRs** in any order; phase0-smoke against `main` will go green
+  as soon as the third one merges and the raw-content CDN catches up
+  (~30 s).
+- **Phase 1** starts after Phase 0 closes; see plan §7 Phase 1 for the
+  org routing layer (`tools.json` becomes a build output, jsonschema
+  validation in CI, `task_index.json` split out as the only hand-curated
+  routing source).
