@@ -1,0 +1,347 @@
+{
+  "schema_version": "1",
+  "kind": "m-dev-tools.org-catalog",
+  "description": "Machine-readable cross-link catalog for the m-dev-tools GitHub organization. Authoritative map from user intent (task_index) to repo + tool + command (tools). Designed to be the first file an AI agent reads after llms.txt when asked to build an M (MUMPS) application using the m-dev-tools stack.",
+
+  "org": {
+    "name": "m-dev-tools",
+    "url": "https://github.com/m-dev-tools",
+    "tagline": "Engine-neutral M (MUMPS) developer tools — TDD + CI/CD stack for InterSystems IRIS and YottaDB.",
+    "license_default": "AGPL-3.0",
+    "license_exceptions": {
+      "m-stdlib-vscode": "MIT",
+      "m-modern-corpus": "per-subdirectory upstream licenses (see LICENSES.md)"
+    },
+    "first_principles": [
+      "m-stdlib has architectural priority over m-cli — when both projects need a utility, it lands in m-stdlib first.",
+      "Source-level tools (m fmt, m lint) are engine-neutral; runtime tools (m test, m coverage) are YottaDB-targeted.",
+      "Every module ships with a vendored conformance corpus tied to the relevant RFC or NIST publication.",
+      "m-cli's CLI ergonomics deliberately mirror Go (`go fmt`/`test`/`vet`) and Rust (`cargo fmt`/`test`/`clippy`) — see m-tools/docs/m-tool-gap-analysis.md for the gap analysis that drove the design."
+    ]
+  },
+
+  "tools": {
+    "m-cli": {
+      "repo": "https://github.com/m-dev-tools/m-cli",
+      "role": "Canonical CLI toolchain — m fmt / lint / test / coverage / watch / lsp / doc / new / ...",
+      "language": "python",
+      "license": "AGPL-3.0",
+      "entry_point": { "type": "cli", "binary": "m" },
+      "consumes": ["tree-sitter-m", "m-standard", "m-test-engine"],
+      "consumed_by": ["tree-sitter-m-vscode"],
+      "docs": {
+        "readme":  "https://github.com/m-dev-tools/m-cli/blob/main/README.md",
+        "claude":  "https://github.com/m-dev-tools/m-cli/blob/main/CLAUDE.md",
+        "guide":   "https://github.com/m-dev-tools/m-cli/blob/main/docs/guide.md",
+        "plugins": "https://github.com/m-dev-tools/m-cli/blob/main/docs/plugin-development.md"
+      },
+      "subcommands": {
+        "fmt":      { "purpose": "Format M source", "rule_sets": ["canonical", "pythonic", "pythonic-lower", "compact", "none"], "vista_round_trip": "99.04%" },
+        "lint":     { "purpose": "Lint M source", "profiles": ["default", "modern", "pedantic", "xindex", "vista", "sac", "pythonic", "all"], "rule_id_prefixes": ["M-XINDX-NN", "M-MOD-NN"], "engine_targeting": ["any", "yottadb", "iris"] },
+        "test":     { "purpose": "Run tests", "test_pattern": "<NAME>TST.m / t<UpperCase>(pass,fail)", "single_test_form": "FILE.m::tLabel", "engine": "m-test-engine", "output_formats": ["text", "tap", "json"] },
+        "watch":    { "purpose": "Re-run affected tests on file change (sub-second TDD loop)", "implementation": "polling (no inotify dependency)" },
+        "coverage": { "purpose": "Line + label coverage via YDB view \"TRACE\"", "output_formats": ["text", "text --lines", "json", "lcov"], "ci_gate_flag": "--min-percent=N" },
+        "lsp":      { "purpose": "Language Server over stdio — diagnostics, formatting, code actions, hover, completion, document symbols, code lenses, folding, signature help, document highlight, go-to-definition, find-references, workspace symbols", "spawn_protocol": "stdio (LSP)" },
+        "doc":      { "purpose": "Lookup STD* symbol docs by name", "manifest": "m-stdlib#manifest" },
+        "search":   { "purpose": "Full-text search across the m-stdlib manifest", "manifest": "m-stdlib#manifest" },
+        "manifest": { "purpose": "Print the active m-stdlib manifest (or filter by module)" },
+        "examples": { "purpose": "Print runnable examples for a STD* module", "manifest": "m-stdlib#manifest" },
+        "errors":   { "purpose": "Print error catalogue for a STD* module", "manifest": "m-stdlib#manifest" },
+        "new":      { "purpose": "Scaffold a TDD-ready M project (Makefile, .m-cli.toml, tests/, CI)", "analogue": "cargo new / go mod init" },
+        "ci":       { "purpose": "CI scaffolding", "subcommands": { "init": { "purpose": "Drop a CI workflow into .github/workflows/" } } },
+        "run":      { "purpose": "Ad-hoc routine execution", "analogue": "go run / cargo run" },
+        "build":    { "purpose": "Compile / package routines", "analogue": "go build / cargo build" },
+        "doctor":   { "purpose": "Self-check: ydb, parser, m-standard, manifests", "analogue": "rustup doctor" },
+        "plugins":  { "purpose": "List m_cli.plugins entry-points (e.g. m-cli-extras' m corpus-stats)" }
+      },
+      "config_file": ".m-cli.toml | pyproject.toml [tool.m-cli]",
+      "pre_commit_hooks": ["m-fmt-check", "m-fmt", "m-lint"]
+    },
+
+    "m-cli-extras": {
+      "repo": "https://github.com/m-dev-tools/m-cli-extras",
+      "role": "Out-of-tree m-cli plugins — niche subcommands registered via the m_cli.plugins entry-point group",
+      "language": "python",
+      "license": "AGPL-3.0",
+      "consumes": ["m-cli"],
+      "subcommands": {
+        "corpus-stats": { "purpose": "Walk a directory of .m files; report file / line / label / parse-error counts", "use_cases": ["Sizing rule profiles before lint runs", "Sanity-checking corpus acquisition", "Quick 'how big' answers"] }
+      }
+    },
+
+    "m-stdlib": {
+      "repo": "https://github.com/m-dev-tools/m-stdlib",
+      "role": "Pure-M (and selectively $ZF-bound) runtime standard library — STD* modules",
+      "language": "m",
+      "license": "AGPL-3.0",
+      "consumes": ["m-test-engine"],
+      "consumed_by": ["m-stdlib-vscode", "m-cli"],
+      "machine_readable": {
+        "manifest": "https://raw.githubusercontent.com/m-dev-tools/m-stdlib/main/dist/stdlib-manifest.json",
+        "manifest_role": "Per-label structured docs (signature, params, returns, raises, since, stable, see-also, examples, source.line). Consumed by m-cli's `m doc/search/examples/errors` and by m-stdlib-vscode for hover/goto-def/completion."
+      },
+      "engine_support": {
+        "yottadb": "first-class (vista-meta + m-test-engine CI)",
+        "iris":    "fail-soft CI via intersystemsdc/iris-community:latest"
+      },
+      "doc_grammar": "M-doc tag grammar v1: @param / @returns / @raises / @example / @since / @stable / @see / @deprecated / @internal — see docs/guides/m-doc-grammar.md",
+      "modules": {
+        "STDASSERT":   { "category": "testing",          "headline": "Assertion library — eq / ne / true / false / near / raises / contains / len + counter start / report. Wire-protocol-compatible with the m-cli test runner." },
+        "STDFIX":      { "category": "testing",          "headline": "Fixture lifecycle — with / invoke / register / cleanup. Powers `m test`'s default per-test isolation." },
+        "STDMOCK":     { "category": "testing",          "headline": "Test-time call interception — register / invoke / $$resolve / $$called / $$args." },
+        "STDSEED":     { "category": "testing",          "headline": "TSV / JSON manifest loader for FileMan record fixtures + pluggable filer hook." },
+        "STDSNAP":     { "category": "testing",          "headline": "Snapshot testing — serialize / save / matches / asserts; canonical line-per-leaf dump via $QUERY." },
+        "STDPROF":     { "category": "testing",          "headline": "Wall-clock profiler — start / stop / count / total / mean / min / max / percentile / tags." },
+        "STDJSON":     { "category": "data",             "headline": "RFC 8259 JSON parser + serializer — one M tree node per JSON value." },
+        "STDREGEX":    { "category": "text",             "headline": "Thompson-NFA regex engine — literals, classes, groups, alternation, greedy quantifiers, capture, replace, split." },
+        "STDXML":      { "category": "data",             "headline": "XML 1.0 parser — elements, attributes, CDATA, comments / PI / xml-decl, namespaces, full XPath subset." },
+        "STDCSV":      { "category": "data",             "headline": "RFC 4180 CSV parser/writer — every §2 clause, optional file I/O." },
+        "STDTOML":     { "category": "data",             "headline": "TOML 1.0 subset — top-level pairs + [section] tables; string / int / float / bool scalars." },
+        "STDB64":      { "category": "encoding",         "headline": "RFC 4648 Base64 — standard alphabet + URL-safe variant + valid predicate." },
+        "STDHEX":      { "category": "encoding",         "headline": "RFC 4648 §8 hex — lowercase default, uppercase variant, case-insensitive decode." },
+        "STDUUID":     { "category": "encoding",         "headline": "RFC 4122 v4 + RFC 9562 v7 UUIDs (v7 sorts in generation order)." },
+        "STDCRYPTO":   { "category": "crypto",           "headline": "SHA-256/384/512 + HMAC-SHA-256/384/512 backed by OpenSSL EVP_Digest + HMAC.", "callout": "libcrypto" },
+        "STDCSPRNG":   { "category": "crypto",           "headline": "Cryptographic random — bytes / hex / base64 / token / int / uuid4 backed by /dev/urandom." },
+        "STDCOMPRESS": { "category": "compression",      "headline": "gzip / gunzip / deflate / inflate / zstdCompress / zstdDecompress + magic-byte autodetect.", "callout": "libz + libzstd" },
+        "STDHTTP":     { "category": "network",          "headline": "HTTP/1.1 client — $$get / $$post / $$request driving libcurl, plus pure-M wire-format helpers.", "callout": "libcurl", "note": "client only — no server" },
+        "STDURL":      { "category": "network",          "headline": "RFC 3986 URI parse / build / encode / decode / valid / normalize / resolve." },
+        "STDDATE":     { "category": "time",             "headline": "ISO-8601 datetime + duration arithmetic — now / fromh / toh / strftime / strptime / add / diff." },
+        "STDLOG":      { "category": "io",               "headline": "Structured logger — five levels, four sinks, kv or json line format." },
+        "STDFS":       { "category": "io",               "headline": "File-system primitives — text + byte-faithful read/write/append, exists/remove/size, basename/dirname/join.", "callout": "libc (byte-faithful arms)" },
+        "STDOS":       { "category": "io",               "headline": "Process / env / cmdline helpers — env / pid / cmdline / argv / cwd / user / hostname / exit." },
+        "STDENV":      { "category": "io",               "headline": ".env loader + typed accessors — parse / parseFile / valid / has / get / getInt / getBool / getFloat." },
+        "STDARGS":     { "category": "cli",              "headline": "argparse — long/short/grouped flags, positionals, sub-commands, `--` terminator." },
+        "STDFMT":      { "category": "text",             "headline": "Printf-style formatter — subset of Python str.format (fill / align / width / precision / type s d f x X o b)." },
+        "STDSTR":      { "category": "text",             "headline": "String helpers — pad / trim / replaceAll / split / startsWith / endsWith / case / repeat." },
+        "STDCOLL":     { "category": "data-structures",  "headline": "Collections — Set / Map / Stack / Queue / Deque / Heap / OrderedDict over caller-owned arrays." },
+        "STDCACHE":    { "category": "data-structures",  "headline": "LRU + TTL cache over caller-owned array — new / put / get / has / remove / clear." },
+        "STDXFRM":     { "category": "data-structures",  "headline": "Higher-order array transforms — map / filter / reduce via XECUTE-evaluated lambdas." },
+        "STDMATH":     { "category": "numeric",          "headline": "Numeric helpers — clamp / min / max / sum / count / mean over caller-owned arrays." },
+        "STDSEMVER":   { "category": "tooling",          "headline": "SemVer 2.0.0 — valid / parse / compare / matches with caret, tilde, comparator AND-combination." }
+      }
+    },
+
+    "m-standard": {
+      "repo": "https://github.com/m-dev-tools/m-standard",
+      "role": "Citable, machine-readable M language reference reconciling four primary sources",
+      "language": "python",
+      "license": "AGPL-3.0",
+      "consumed_by": ["tree-sitter-m", "m-cli"],
+      "sources": ["AnnoStd (ISO 11756 / ANSI X11.1-1995)", "YottaDB docs", "InterSystems IRIS docs", "VA SAC / XINDEX rules"],
+      "machine_readable": {
+        "grammar_surface": "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/grammar-surface.json",
+        "commands":        "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/commands.tsv",
+        "intrinsic_functions": "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/intrinsic-functions.tsv",
+        "intrinsic_special_variables": "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/intrinsic-special-variables.tsv",
+        "operators":       "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/operators.tsv",
+        "errors":          "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/errors.tsv",
+        "pragmatic_standard":   "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/pragmatic-m-standard.json",
+        "operational_standard": "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/operational-m-standard.json",
+        "va_sac_rules":   "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/va-sac-rules.tsv",
+        "schema_version_pin": "Downstream consumers pin schema_version=\"1\" (per ADR-005). Additive changes flow through; breaking changes bump."
+      },
+      "three_layered_standards": {
+        "pragmatic":   "What runs unmodified on both YDB and IRIS (81 tokens)",
+        "va_sac":      "What the VA permits in VistA code (65 rules / 171 per-name flags)",
+        "operational": "Pragmatic ∩ SAC — what a VistA developer can use (58 tokens)"
+      }
+    },
+
+    "tree-sitter-m": {
+      "repo": "https://github.com/m-dev-tools/tree-sitter-m",
+      "role": "Tree-sitter grammar for M — generated mechanically from m-standard's grammar-surface.json",
+      "language": "javascript (grammar) + multi-language bindings",
+      "license": "AGPL-3.0",
+      "consumes": ["m-standard"],
+      "consumed_by": ["m-cli", "tree-sitter-m-vscode"],
+      "bindings": ["wasm", "node", "rust", "python", "go"],
+      "validation": {
+        "vista_corpus": { "routines": 39330, "clean_pct": 99.06 },
+        "modern_corpus": "m-modern-corpus (calibrates non-VistA grammar gates)",
+        "perf_target":   "10,000-line synthesised routine in <80ms cold parse"
+      }
+    },
+
+    "m-test-engine": {
+      "repo": "https://github.com/m-dev-tools/m-test-engine",
+      "role": "Minimal YottaDB Docker container — the lightweight default test substrate for non-VistA M development",
+      "language": "dockerfile",
+      "license": "AGPL-3.0",
+      "consumed_by": ["m-cli", "m-stdlib"],
+      "container_name": "m-test-engine",
+      "bind_mount": "/work (default $PWD)",
+      "transport": "docker exec (no SSH)",
+      "lifecycle": {
+        "make up":    "Build image (if needed) and start container detached",
+        "make down":  "Stop and remove container; preserves globals volume",
+        "make logs":  "Tail container stdout",
+        "make shell": "Bash shell inside container",
+        "make smoke": "One-shot: assert mumps -run %XCMD works",
+        "make clean": "Destructive — stop + remove + delete globals volume"
+      },
+      "alternative": "vista-meta (heavyweight, VistA + FileMan + RPC + Octo SQL) — keep for VistA-specific work"
+    },
+
+    "tree-sitter-m-vscode": {
+      "repo": "https://github.com/m-dev-tools/tree-sitter-m-vscode",
+      "role": "VS Code extension — syntax highlighting via tree-sitter-m WASM + LSP client (spawns `m lsp` from m-cli)",
+      "language": "typescript",
+      "license": "AGPL-3.0",
+      "consumes": ["tree-sitter-m", "m-cli"],
+      "marketplace_publisher": "rafael5",
+      "marketplace_id": "rafael5.tree-sitter-m-vscode",
+      "file_associations": [".m", ".mac", ".int"],
+      "settings": ["m-cli.enabled", "m-cli.path", "m-cli.args", "m-cli.trace.server"],
+      "commands": ["About this extension", "Open all M files in workspace as tabs", "Smoke-report all M files in workspace", "Restart Language Server"]
+    },
+
+    "m-stdlib-vscode": {
+      "repo": "https://github.com/m-dev-tools/m-stdlib-vscode",
+      "role": "VS Code extension — manifest-driven hover / goto-def / completion for STD* symbols in .m files",
+      "language": "typescript",
+      "license": "MIT",
+      "consumes": ["m-stdlib"],
+      "marketplace_publisher": "rafael5",
+      "marketplace_id": "rafael5.m-stdlib-vscode",
+      "manifest_discovery_order": ["m-stdlib.manifestPath setting", "$M_CLI_MANIFEST env var", "workspace folder walk-up", "bundled assets/stdlib-manifest.json"],
+      "settings": ["m-stdlib.manifestPath", "m-stdlib.enableHover", "m-stdlib.enableDefinition", "m-stdlib.enableCompletion"]
+    },
+
+    "m-modern-corpus": {
+      "repo": "https://github.com/m-dev-tools/m-modern-corpus",
+      "role": "Validation corpus — modern non-VistA M source from active open-source projects",
+      "license": "per-subdirectory upstream licenses (see LICENSES.md)",
+      "consumed_by": ["tree-sitter-m", "m-cli"],
+      "upstream_projects": ["EWD", "mgsql", "M-Web-Server", "YDBOcto auxiliary", "YDBTest"],
+      "calibrates": "M-MOD-NN lint rule track (target ~3 findings/routine on default profile vs ~57 for legacy XINDEX rules)"
+    },
+
+    "m-tools": {
+      "repo": "https://github.com/m-dev-tools/m-tools",
+      "role": "ARCHIVED — historical seed of the entire org. Original gap analysis + Tier 1–4 strategy + canonical command map.",
+      "status": "archived",
+      "preserved_docs": [
+        "docs/gap-analysis-and-remediation-strategy.md",
+        "docs/m-tool-gap-analysis.md",
+        "docs/m-tooling-tier1.md",
+        "docs/implementation.md"
+      ],
+      "read_for": "Why the ecosystem is shaped the way it is. See m-tools/docs/m-tool-gap-analysis.md for the Go/Rust/Python comparison that drove m-cli's CLI ergonomics."
+    }
+  },
+
+  "task_index": {
+    "_comment": "Plain-English user intent → primary tool/module + see-alsos + minimal example. Use this as the first lookup when a user asks 'how do I X in M?'",
+
+    "workflow": {
+      "scaffold_new_project":     { "intent": "Start a new M project with TDD/CI scaffolding",            "primary": "m-cli#new",      "command": "m new myproj",                              "analogue_go": "go mod init",   "analogue_rust": "cargo new" },
+      "run_all_tests":            { "intent": "Run every test suite in the project",                     "primary": "m-cli#test",     "command": "m test",                                    "analogue_go": "go test ./...", "analogue_rust": "cargo test" },
+      "run_one_test":             { "intent": "Run a single test by file::label",                        "primary": "m-cli#test",     "command": "m test FILE.m::tHappyPath" },
+      "watch_loop":               { "intent": "Sub-second TDD feedback — rerun affected tests on save",  "primary": "m-cli#watch",    "command": "m watch",                                   "analogue_go": "watchexec go test", "analogue_rust": "cargo watch -x test" },
+      "format_source":            { "intent": "Canonicalise M source layout",                            "primary": "m-cli#fmt",      "command": "m fmt path/",                               "analogue_go": "go fmt",        "analogue_rust": "cargo fmt" },
+      "lint_source":              { "intent": "Static-analyze M source",                                 "primary": "m-cli#lint",     "command": "m lint path/",                              "analogue_go": "go vet",        "analogue_rust": "cargo clippy" },
+      "coverage_gate":            { "intent": "Enforce minimum coverage in CI",                          "primary": "m-cli#coverage", "command": "m coverage --min-percent=85" },
+      "translate_compact_to_canonical": { "intent": "Expand VistA-compact code (S X=1) to canonical names (SET X=1)", "primary": "m-cli#fmt", "command": "m fmt --rules=pythonic path/" },
+      "scaffold_ci":              { "intent": "Drop a CI workflow into the project",                     "primary": "m-cli#ci",       "command": "m ci init" },
+      "pre_commit":               { "intent": "Block bad commits with fmt-check + lint",                 "primary": "m-cli#pre-commit-hooks", "see_also": ["m-cli#fmt", "m-cli#lint"], "config": ".pre-commit-config.yaml referencing m-cli's .pre-commit-hooks.yaml" },
+      "self_check":               { "intent": "Verify ydb / parser / m-standard / manifests resolve",    "primary": "m-cli#doctor",   "command": "m doctor" },
+      "lookup_stdlib_symbol":     { "intent": "What does parse^STDJSON do? Show signature + examples",   "primary": "m-cli#doc",      "command": "m doc parse^STDJSON" },
+      "search_stdlib":            { "intent": "Find stdlib functions by keyword",                        "primary": "m-cli#search",   "command": "m search uuid" },
+      "editor_setup":             { "intent": "Configure VS Code for M development",                     "primary": "tree-sitter-m-vscode", "see_also": ["m-stdlib-vscode", "m-cli#lsp"] }
+    },
+
+    "lib": {
+      "assertions":         { "intent": "Write tests with rich assertions",                  "primary": "m-stdlib#STDASSERT", "example": "do eq^STDASSERT(.pass,.fail,actual,expected,\"desc\")" },
+      "fixtures":           { "intent": "Per-test setup/teardown isolation",                 "primary": "m-stdlib#STDFIX",    "see_also": ["m-cli#test"] },
+      "mocks":              { "intent": "Intercept calls during tests",                      "primary": "m-stdlib#STDMOCK" },
+      "snapshot_testing":   { "intent": "Compare structured output against a saved snapshot","primary": "m-stdlib#STDSNAP" },
+      "profiling":          { "intent": "Wall-clock measure spans of M code",                "primary": "m-stdlib#STDPROF" },
+      "json_parse":         { "intent": "Parse JSON text into an M tree",                    "primary": "m-stdlib#STDJSON",   "example": "do parse^STDJSON(jsonText,.tree)" },
+      "json_serialize":     { "intent": "Serialize an M tree to JSON text",                  "primary": "m-stdlib#STDJSON" },
+      "regex":              { "intent": "Pattern-match strings",                             "primary": "m-stdlib#STDREGEX" },
+      "csv_parse":          { "intent": "Parse RFC 4180 CSV",                                "primary": "m-stdlib#STDCSV" },
+      "xml_parse":          { "intent": "Parse XML; query with XPath subset",                "primary": "m-stdlib#STDXML" },
+      "toml_parse":         { "intent": "Parse TOML configuration",                          "primary": "m-stdlib#STDTOML" },
+      "http_client":        { "intent": "Make HTTP/1.1 requests",                            "primary": "m-stdlib#STDHTTP",   "example": "set rsp=$$get^STDHTTP(\"https://api.example.com/users\")", "note": "client only — m-stdlib does not ship an HTTP server" },
+      "url_parse":          { "intent": "Parse / build / normalize URIs",                    "primary": "m-stdlib#STDURL" },
+      "datetime":           { "intent": "Work with ISO-8601 dates and durations",            "primary": "m-stdlib#STDDATE" },
+      "logging":            { "intent": "Emit structured log lines",                         "primary": "m-stdlib#STDLOG" },
+      "file_io":            { "intent": "Read / write files",                                "primary": "m-stdlib#STDFS" },
+      "env_vars":           { "intent": "Read environment variables / cmdline",              "primary": "m-stdlib#STDOS",     "see_also": ["m-stdlib#STDENV"] },
+      "dotenv":             { "intent": "Load .env file with typed accessors",               "primary": "m-stdlib#STDENV" },
+      "argparse":           { "intent": "Parse CLI flags + subcommands",                     "primary": "m-stdlib#STDARGS" },
+      "uuid":               { "intent": "Generate UUIDs (v4 random or v7 sortable)",         "primary": "m-stdlib#STDUUID" },
+      "base64":             { "intent": "Base64 encode / decode",                            "primary": "m-stdlib#STDB64" },
+      "hex":                { "intent": "Hex encode / decode",                               "primary": "m-stdlib#STDHEX" },
+      "sha_hmac":           { "intent": "Compute SHA-256/384/512 + HMAC",                    "primary": "m-stdlib#STDCRYPTO" },
+      "random_secure":      { "intent": "Cryptographically secure random bytes / tokens",    "primary": "m-stdlib#STDCSPRNG" },
+      "compression":        { "intent": "gzip / deflate / zstd compress + decompress",       "primary": "m-stdlib#STDCOMPRESS" },
+      "string_format":      { "intent": "Printf-style formatting",                           "primary": "m-stdlib#STDFMT" },
+      "string_helpers":     { "intent": "Common string operations",                          "primary": "m-stdlib#STDSTR" },
+      "collections":        { "intent": "Set / Map / Stack / Queue / Heap / OrderedDict",    "primary": "m-stdlib#STDCOLL" },
+      "lru_cache":          { "intent": "Bounded cache with TTL",                            "primary": "m-stdlib#STDCACHE" },
+      "higher_order":       { "intent": "map / filter / reduce over arrays",                 "primary": "m-stdlib#STDXFRM" },
+      "math":               { "intent": "clamp / min / max / sum / mean",                    "primary": "m-stdlib#STDMATH" },
+      "semver":             { "intent": "Parse / compare SemVer strings",                    "primary": "m-stdlib#STDSEMVER" },
+      "fixtures_fileman":   { "intent": "Load FileMan record fixtures from TSV/JSON manifest","primary": "m-stdlib#STDSEED" }
+    },
+
+    "language": {
+      "is_keyword_portable":      { "intent": "Does this command/function run on both YDB and IRIS?", "primary": "m-standard#pragmatic_standard" },
+      "is_keyword_ansi_standard": { "intent": "Is this part of the ANSI M standard?",                 "primary": "m-standard#machine_readable.commands" },
+      "is_keyword_va_sac_clean":  { "intent": "Does the VA SAC permit this in VistA code?",           "primary": "m-standard#va_sac_rules" },
+      "all_keywords_for_grammar": { "intent": "Need every command/function/ISV with provenance for a parser/linter", "primary": "m-standard#grammar_surface" },
+      "ydb_specific_token":       { "intent": "Which $Z* / Z* tokens are YDB extensions?",            "primary": "m-standard#machine_readable.intrinsic_functions" },
+      "iris_specific_token":      { "intent": "Which $Z* / Z* tokens are IRIS extensions?",           "primary": "m-standard#machine_readable.intrinsic_functions" }
+    },
+
+    "infra": {
+      "docker_yottadb":           { "intent": "Run YottaDB in a container for tests",                 "primary": "m-test-engine", "command": "make -C ~/projects/m-test-engine up" },
+      "test_corpus_modern":       { "intent": "Validate against modern non-VistA M code",             "primary": "m-modern-corpus" },
+      "test_corpus_vista":        { "intent": "Validate against VistA's 39,330-routine corpus",       "primary": "tree-sitter-m", "see_also": ["m-cli#lint"] }
+    },
+
+    "history": {
+      "why_does_m-dev-tools_exist": { "intent": "Read the original gap analysis that justified the org",     "primary": "m-tools",       "doc": "https://github.com/m-dev-tools/m-tools/blob/main/docs/gap-analysis-and-remediation-strategy.md" },
+      "go_rust_python_analogues":   { "intent": "How does m-cli map to go/cargo/poetry?",                    "primary": "m-tools",       "doc": "https://github.com/m-dev-tools/m-tools/blob/main/docs/m-tool-gap-analysis.md" },
+      "tier1_strategy":             { "intent": "What was the original Tier 1 deliverable scope?",           "primary": "m-tools",       "doc": "https://github.com/m-dev-tools/m-tools/blob/main/docs/m-tooling-tier1.md" }
+    }
+  },
+
+  "workflow": {
+    "tdd_inner_loop": {
+      "description": "Canonical red → green → refactor loop using m-dev-tools. Mirrors `cargo new && cargo test && cargo clippy && cargo fmt` end to end.",
+      "steps": [
+        { "n": 1, "phase": "scaffold",  "action": "Create a new M project with Makefile, .m-cli.toml, tests/, CI", "command": "m new myproj && cd myproj" },
+        { "n": 2, "phase": "engine",    "action": "Start the test engine container",                                "command": "make -C ~/projects/m-test-engine up", "tool": "m-test-engine" },
+        { "n": 3, "phase": "red",       "action": "Write a failing test in tests/MYRTNTST.m using STDASSERT",       "tools": ["m-stdlib#STDASSERT"], "example": "do start^STDASSERT(.pass,.fail) ... do eq^STDASSERT(.pass,.fail,$$add^myrtn(2,3),5,\"add\") ... do report^STDASSERT(pass,fail)" },
+        { "n": 4, "phase": "red",       "action": "Run — confirm RED",                                              "command": "m test" },
+        { "n": 5, "phase": "green",     "action": "Implement the routine until tests pass",                         "command": "m test" },
+        { "n": 6, "phase": "refactor",  "action": "Format + lint",                                                  "command": "m fmt && m lint --error-on=error" },
+        { "n": 7, "phase": "gate",      "action": "Coverage gate (default ≥85%)",                                   "command": "m coverage --min-percent=85" },
+        { "n": 8, "phase": "watch",     "action": "Optional — leave watch running for sub-second feedback",         "command": "m watch", "note": "skip steps 4–6 manually after this; the watcher reruns affected suites on save" },
+        { "n": 9, "phase": "commit",    "action": "Pre-commit hook re-runs fmt-check + lint",                       "tool": "pre-commit", "config": ".pre-commit-config.yaml referencing m-cli's .pre-commit-hooks.yaml" },
+        { "n": 10, "phase": "ci",       "action": "Push — CI runs the same gates via `make ci`",                    "command": "git push", "see_also": ["m-cli#ci"] }
+      ]
+    },
+    "minimal_application_recipe": {
+      "description": "Smallest realistic project: parse a JSON HTTP response and log it. Hits STDHTTP + STDJSON + STDLOG end-to-end.",
+      "steps": [
+        { "n": 1, "action": "Scaffold",                          "command": "m new fetcher && cd fetcher" },
+        { "n": 2, "action": "Write tests/FETCHTST.m with STDASSERT + STDMOCK (mock STDHTTP)" },
+        { "n": 3, "action": "Implement src/fetch.m using STDHTTP for the call, STDJSON for parsing, STDLOG for output" },
+        { "n": 4, "action": "Run",                               "command": "m test && m fmt && m lint" }
+      ]
+    }
+  },
+
+  "discovery_protocol": {
+    "_comment": "How an AI agent should consume this catalog when given a fresh user request.",
+    "step_1_read":   ["llms.txt (when present)", "this file (tools.json)"],
+    "step_2_match":  "Map user intent to one or more task_index keys (try fuzzy keyword match against the `intent` strings).",
+    "step_3_resolve": "For each match, follow `primary` (and optionally `see_also`) into the `tools` map for the canonical repo + URL.",
+    "step_4_load":   "Fetch the per-tool `manifest` / `machine_readable` URL when available — those are the ground truth for symbol-level docs (signatures, params, examples).",
+    "step_5_compose": "Use the `workflow.tdd_inner_loop` step list to structure the build — never skip the RED step (write the failing test first).",
+    "step_6_verify": "Cite manifest URLs and rule_ids in code generation; do not paraphrase. If a STD* function is not in the manifest, do not invent one — propose a contribution to m-stdlib first."
+  }
+}

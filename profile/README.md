@@ -21,6 +21,20 @@ editor integrations, they form an end-to-end TDD stack that works
 identically for **InterSystems IRIS** and **YottaDB** developers
 maintaining modern (non-VistA) M code.
 
+## For AI agents and automated tooling
+
+Start with **[`tools.json`](tools.json)** — a machine-readable catalog of every
+repo, every `m <subcommand>`, every `m-stdlib` module, and a 58-entry
+`task_index` mapping plain-English user intent ("parse JSON", "make HTTP
+request", "scaffold project", …) to the exact tool + command. The
+`workflow.tdd_inner_loop` block walks the canonical red → green → refactor
+sequence with the precise commands at each step. Schema is `schema_version: "1"`
+(stable; additive changes only).
+
+Manifest pointers for symbol-level lookups:
+- **m-stdlib API** → [`dist/stdlib-manifest.json`](https://raw.githubusercontent.com/m-dev-tools/m-stdlib/main/dist/stdlib-manifest.json)
+- **M language surface** → [`integrated/grammar-surface.json`](https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/grammar-surface.json)
+
 ## Repositories
 
 ### Foundation
