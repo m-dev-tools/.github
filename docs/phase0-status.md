@@ -1,82 +1,80 @@
 # Phase 0 — Status
 
 Companion to [`phase0-plan.md`](phase0-plan.md). Records concrete stage
-progress so any resuming session can pick up without re-discovering
-state.
+progress.
 
-**Last updated:** 2026-05-10 (session 3 — validator path-resolution fix)
+**Last updated:** 2026-05-10 (Phase 0 closed — all PRs merged, smoke green on `main`)
+
+## ✅ Phase 0 complete
+
+`make phase0-smoke` green against `main` URLs. All twelve cross-repo
+`exposes` pointers (2 m-stdlib + 7 m-standard + 3 m-cli) resolve and
+parse. The Phase 0 exit criterion is met.
 
 ## Stage status
 
 | Stage | Status | Notes |
 |---|---|---|
 | A1 | done | `profile/repo.meta.schema.json` shipped at `0469fe4`. |
-| A2 | done | `profile/repo.meta.example.json` shipped at `0469fe4`; updated to repo-root path (`profile/repo.meta.schema.json`). |
-| A3 | done | `profile/build/validate-repo-meta.py` shipped at `0469fe4`; **path resolution fixed this session** — walks `.git` ancestor for path mode, strips raw-GitHub URL to branch base for URL mode. Both modes tested. |
-| A4 | done | `make check-repo-meta META=…` target in `.github/Makefile`. |
-| A5 | done | Pushed; origin/main carries A1–A4 + tracker cleanup. Schema URL `raw.githubusercontent.com/m-dev-tools/.github/main/profile/repo.meta.schema.json` resolves. |
+| A2 | done | `profile/repo.meta.example.json` shipped at `0469fe4`. |
+| A3 | done | `profile/build/validate-repo-meta.py` shipped at `0469fe4`; path resolution fixed at `e8be174` (walks `.git` ancestor / strips raw URL to branch base). |
+| A4 | done | `make check-repo-meta META=…` target in `.github/Makefile` at `0469fe4`. |
+| A5 | done | `.github/main` carries A1–A4 + tracker cleanup + validator fix. Schema URL `raw.githubusercontent.com/m-dev-tools/.github/main/profile/repo.meta.schema.json` resolves. |
 | B1–B5 | done | Captured in `phase0-B-repo-meta` commit body. |
-| B6 | done (branch) | Branch `phase0-B-repo-meta` pushed @ `03ef40a`; **PR not yet opened/merged**. |
-| C1–C5 | done | Out-of-session work (commit `ceb7c08`). |
-| C6 | done (branch) | Branch `phase0-c-repo-meta` pushed @ `ceb7c08`; **PR not yet opened/merged**. |
-| D1–D9 | done | Out-of-session work (commit `8908508`); `m capabilities --json` implemented; `dist/commands.json`, `dist/lint-rules.json`, `dist/fmt-rules.json` present. |
-| D10 | done (branch) | Branch `phase0-D` pushed @ `8908508`; **PR not yet opened/merged**. |
+| B6 | **merged** | PR #2 squash-merged to m-stdlib `main`. Branch deleted on origin. |
+| C1–C5 | done | Captured in `phase0-c-repo-meta` commit body. |
+| C6 | **merged** | PR #5 squash-merged to m-standard `main`. Branch deleted on origin. |
+| D1–D9 | done | Captured in `phase0-D` commit bodies (commands/lint-rules/fmt-rules introspection + drift gate + AGENTS.md adoption). |
+| D10 | **merged** | PR #8 squash-merged to m-cli `main`. Branch deleted on origin. Three commits squashed: `8908508` (capabilities) + `f516e76` (drift-gate gotchas) + `aa52ae8` (repo-root path convention). |
 | E1 | done | TIER_1 production URLs pinned in `profile/build/phase0-smoke.py`. |
-| E2 | done | `profile/build/phase0-smoke.py` written; reuses `validate-repo-meta.py`'s inline-validation fallback. |
-| E3 | done | `make phase0-smoke` target in `.github/Makefile`; supports `URLS=…` override for dry-runs. |
-| E4 | done (dry-run) | **3/3 PASS** against feature-branch URLs (m-stdlib ✓, m-standard ✓, m-cli ✓ after `aa52ae8`). Full pass against `main` URLs blocked on PR merges. |
-| E5 | done | Track E artifacts (status doc + smoke script + Makefile target) committed at `.github` `7f60dcd`. |
+| E2 | done | `profile/build/phase0-smoke.py` written; reuses `validate-repo-meta.py`'s validation logic. |
+| E3 | done | `make phase0-smoke` target in `.github/Makefile`; `URLS=…` override supported. |
+| E4 | **done** | **3/3 PASS** against `main` URLs (the production target). Feature-branch dry-run was 3/3 pre-merge. |
+| E5 | done | Track E artifacts committed at `.github` `7f60dcd`. |
 
 ## Resolved follow-ups
 
 1. **A4 status.** Confirmed done at `0469fe4`.
-2. **Validator path resolution.** Fixed this session. Both modes
-   verified: path mode (`.git` ancestor walk → repo root, fallback to
-   manifest dir for fixtures outside a repo) and URL mode (regex strip
-   `https://raw.githubusercontent.com/<org>/<repo>/<branch>/`). Three
-   tests pinned: positive resolve, missing-path negative, no-`.git`
-   fallback. m-stdlib's `dist/stdlib-manifest.json` and m-standard's
-   `docs/integrated/*.tsv` paths now resolve without `--no-resolve`.
+2. **Validator path resolution.** Fixed at `e8be174`. Both modes
+   verified with positive, negative, and no-`.git`-fallback tests.
+3. **m-cli manifest path convention.** Fixed at m-cli `aa52ae8`
+   (folded into the squashed PR #8 merge commit on m-cli `main`).
+4. **m-stdlib `tools/gen-manifest.py` changelog drift.** Bundled
+   into the Track B squashed commit on m-stdlib `main`.
+5. **Drift-gate gotchas surfaced on m-cli PR #8** (plugin-leak from
+   maintainer's venv; argparse `required` cross-version variance).
+   Captured in m-cli `f516e76` and in
+   `~/claude/memory/feedback_manifest_drift_gotchas.md` for future
+   manifest-drift work.
 
-## Outstanding follow-ups
+## Outstanding follow-ups (Phase 0 cleanup, non-blocking)
 
-1. ~~**m-cli manifest paths.**~~ Resolved on `phase0-D` at `aa52ae8`
-   (m-cli). Smoke dry-run now 3/3.
+1. **Local feature branches still exist** in each repo's local clone
+   even though origin deleted them. Optional cleanup:
+   ```bash
+   cd m-stdlib && git checkout main && git pull && git branch -D phase0-B-repo-meta
+   cd m-standard && git checkout main && git pull && git branch -D phase0-c-repo-meta
+   cd m-cli && git checkout main && git pull && git branch -D phase0-D
+   ```
 
-2. **B/C check-manifest target may pass `--no-resolve`** as a leftover
-   workaround. With the validator fixed, those targets can drop the
-   flag in a small follow-up commit on each branch (or as part of PR
-   review).
+## Next
 
-3. **Auto-classifier blocks direct push to `.github/main`.** The
-   user/system rule wants explicit human authorization for changes to
-   `.github`'s main branch. This file (and the Track A path-resolution
-   fix) need explicit "yes push" rather than the proactive
-   commit-push-by-default behavior used elsewhere.
+Phase 1 — org routing layer. See
+[`AI-discoverability-plan.md`](AI-discoverability-plan.md) §7 Phase 1:
 
-4. **m-stdlib side-fix bundled in `03ef40a`.** `tools/gen-manifest.py`
-   updated to read `docs/tracking/changelog.md` (relocated from
-   repo-root `CHANGELOG.md`); restores empty `stdlib_version` and
-   makes `make manifest-check` green on fresh clones.
+- `repo.meta.schema.json` already exists (lands in this phase
+  formally, but already in production from Phase 0).
+- Tighten `tools.schema.json`: typed-ID regex,
+  `additionalProperties: false`, `task_index` inner schema.
+- Write `profile/build/build-catalog.py` — reads each tier-1
+  `dist/repo.meta.json` from the catalog's TIER_1 list, follows
+  `exposes` pointers, emits summary into a regenerated
+  `profile/tools.json`.
+- Split out `profile/task_index.json` from `tools.json` as the only
+  hand-curated routing source.
+- Migrate `llms.txt` to strict llmstxt.org format.
+- Wire `make catalog`, `make validate-catalog`, and CI.
 
-## Branches in flight
-
-- `m-dev-tools/.github` @ `main` — Track A merged. **Pending commit
-  this session:** validator path-resolution fix + schema description
-  refresh + example.json path update + this status doc.
-- `m-dev-tools/m-stdlib` @ `phase0-B-repo-meta` — pushed @ `03ef40a`; PR pending.
-- `m-dev-tools/m-standard` @ `phase0-c-repo-meta` — pushed @ `ceb7c08`; PR pending.
-- `m-dev-tools/m-cli` @ `phase0-D` — pushed @ `8908508`; PR pending. Needs the manifest-path fix (#1 above) before merge.
-
-## Resume points
-
-All technical work is done. Remaining steps are cross-repo coordination:
-
-- **Open PRs for B, C, D** (`gh pr create` in each repo).
-- **Merge PRs** in any order; phase0-smoke against `main` will go green
-  as soon as the third one merges and the raw-content CDN catches up
-  (~30 s).
-- **Phase 1** starts after Phase 0 closes; see plan §7 Phase 1 for the
-  org routing layer (`tools.json` becomes a build output, jsonschema
-  validation in CI, `task_index.json` split out as the only hand-curated
-  routing source).
+Phase 1 exit: `make catalog && make validate-catalog` green;
+`tools.json` no longer contains hand-maintained subcommand /
+module / rule lists.
