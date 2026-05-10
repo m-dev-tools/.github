@@ -1,0 +1,20 @@
+{
+  "$schema": "https://raw.githubusercontent.com/m-dev-tools/.github/main/profile/repo.meta.schema.json",
+  "id": "tool:example-repo",
+  "repo": "https://github.com/m-dev-tools/example-repo",
+  "role": "Canonical example — not a real repo. Copy and adapt for a new m-dev-tools repo onboarding.",
+  "language": ["python"],
+  "license": "AGPL-3.0",
+  "agent_instructions": "AGENTS.md",
+  "verified_on": "2026-05-10",
+  "exposes": {
+    "schema": "repo.meta.schema.json"
+  },
+  "consumes": [],
+  "verification_commands": [
+    "make check",
+    "make check-manifest"
+  ],
+  "status": "active",
+  "notes": "The `exposes` entry points at this directory's own schema file so the validator's resolve step can demonstrate a successful fetch + JSON-parse against a real file. Real repos point at their own dist/ payloads."
+}
