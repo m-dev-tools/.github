@@ -8,7 +8,7 @@
   "agent_instructions": "AGENTS.md",
   "verified_on": "2026-05-10",
   "exposes": {
-    "schema": "repo.meta.schema.json"
+    "schema": "profile/repo.meta.schema.json"
   },
   "consumes": [],
   "verification_commands": [
@@ -16,5 +16,5 @@
     "make check-manifest"
   ],
   "status": "active",
-  "notes": "The `exposes` entry points at this directory's own schema file so the validator's resolve step can demonstrate a successful fetch + JSON-parse against a real file. Real repos point at their own dist/ payloads."
+  "notes": "The `exposes` entry points at the schema file relative to this repo's root (resolved via .git ancestor walk) so the validator's resolve step has a real payload to fetch + JSON-parse. Real repos use paths like 'dist/commands.json' or 'docs/integrated/grammar-surface.json' relative to their own repo roots."
 }

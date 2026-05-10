@@ -10,10 +10,14 @@ Two stages:
    defers full draft-2020-12 semantics to `jsonschema` when available.
 
 2. Exposes resolution (default on; disable with --no-resolve). For each
-   key in `exposes`, fetch the value as a path (relative to the target
-   file's directory) or URL. If the resolved name ends in `.json`, assert
-   it parses as JSON. Otherwise (`.tsv` etc.) just assert the resource
-   exists / returns HTTP 200.
+   key in `exposes`, fetch the value as a path **relative to the repo
+   root** (found by walking up from the manifest to a `.git` ancestor;
+   falls back to the manifest's directory if no `.git` is found, which
+   handles unit tests against fixtures outside a repo). For URL mode,
+   the base is the raw-content prefix up to and including the branch
+   (`https://raw.githubusercontent.com/<org>/<repo>/<branch>/`). If the
+   resolved resource ends in `.json`, assert it parses. Otherwise
+   (`.tsv` etc.) just assert it exists / returns HTTP 200.
 
 Usage:
     validate-repo-meta.py <path-or-url> [--no-resolve]
@@ -66,15 +70,50 @@ ALLOWED_TOP = {
 ALLOWED_STATUS = {"active", "archived", "deprecated"}
 
 
+RAW_GITHUB_RE = re.compile(
+    r"^(https?://raw\.githubusercontent\.com/[^/]+/[^/]+/[^/]+/)"
+)
+
+
+def _find_repo_root(start: Path) -> Path:
+    """Walk up from `start` looking for a `.git` directory or file.
+
+    Returns the first ancestor that contains `.git`. Falls back to
+    `start` if none found (handles validation against fixtures outside
+    a git repo, e.g. the canonical example.json).
+    """
+    for ancestor in [start, *start.parents]:
+        if (ancestor / ".git").exists():
+            return ancestor
+    return start
+
+
+def _url_repo_base(target: str) -> str:
+    """For a GitHub raw URL, return the prefix up to and including the
+    branch (i.e. the repo-root equivalent). For any other URL, fall
+    back to stripping the last path component.
+    """
+    m = RAW_GITHUB_RE.match(target)
+    if m:
+        return m.group(1)
+    return target.rsplit("/", 1)[0] + "/"
+
+
 def load(target: str) -> tuple[dict, str]:
-    """Return (parsed json, base for resolving relative exposes)."""
+    """Return (parsed json, base for resolving relative exposes paths).
+
+    The base is the repo-root equivalent — for path mode, the nearest
+    .git ancestor; for URL mode, the raw-content prefix up to the
+    branch. Trailing slash is always present so naive string
+    concatenation works.
+    """
     if URL_RE.match(target):
         with urllib.request.urlopen(target, timeout=15) as resp:
             data = resp.read().decode("utf-8")
-        base = target.rsplit("/", 1)[0] + "/"
-        return json.loads(data), base
+        return json.loads(data), _url_repo_base(target)
     path = Path(target).resolve()
-    return json.loads(path.read_text(encoding="utf-8")), str(path.parent) + "/"
+    root = _find_repo_root(path.parent)
+    return json.loads(path.read_text(encoding="utf-8")), str(root) + "/"
 
 
 def _inline_validate(data: dict, errors: list[str]) -> None:

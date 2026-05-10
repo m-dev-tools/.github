@@ -67,7 +67,7 @@
         "type": "string",
         "minLength": 1
       },
-      "description": "Map from logical kind ('commands', 'modules', 'lint_rules', ...) to a path (relative to repo root) or absolute URL where the structured payload lives. Repos declare what they own; the org generator follows these pointers."
+      "description": "Map from logical kind ('commands', 'modules', 'lint_rules', ...) to a path (relative to repo root, resolved by walking up from the manifest to find a .git ancestor) or absolute URL where the structured payload lives. For URL mode, the base is the repo's raw-content prefix (everything up to and including the branch). Repos declare what they own; the org generator follows these pointers."
     },
     "consumes": {
       "type": "array",
