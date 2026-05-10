@@ -1,4 +1,4 @@
-.PHONY: validate-catalog check-repo-meta
+.PHONY: validate-catalog check-repo-meta phase0-smoke
 
 validate-catalog:
 	python3 -m json.tool profile/tools.json >/tmp/m-dev-tools-tools-json-check
@@ -17,3 +17,17 @@ check-repo-meta:
 		exit 2; \
 	fi
 	python3 profile/build/validate-repo-meta.py $(META) $(ARGS)
+
+# Phase-0 Track E: the full tier-1 smoke test. Fetches each tier-1 repo's
+# dist/repo.meta.json from main, validates it, follows its `exposes`
+# pointers, and asserts each payload returns HTTP 200 (and parses as JSON
+# for .json targets).
+#
+#   make phase0-smoke
+#   make phase0-smoke URLS="<url1> <url2> <url3>"   # dry-run against feature branches
+phase0-smoke:
+	@if [ -n "$(URLS)" ]; then \
+		python3 profile/build/phase0-smoke.py --urls $(URLS); \
+	else \
+		python3 profile/build/phase0-smoke.py; \
+	fi
