@@ -91,6 +91,68 @@ At the end of a work session:
 3. Record verification run or explain why verification was not run.
 4. Add any next task IDs.
 
+## Required Lifecycle For Every AI Task
+
+Every `AI-` task has three required moments: start, during, and finish. Agents
+must update the tracking docs at each moment instead of waiting until the final
+response.
+
+### Before Starting
+
+- [ ] Read this file.
+- [ ] Select exactly one active `AI-` task, or create a new one.
+- [ ] Set the task status to `doing`.
+- [ ] Check the `Blocks` column.
+- [ ] Read linked `DISC-`, `REM-`, `ADR-`, and `SCH-` entries.
+- [ ] Confirm expected outputs and verification command.
+
+### During Work
+
+- [ ] Log discoveries in `discoveries.md` when they are found.
+- [ ] Create `REM-` items for concrete follow-up work.
+- [ ] Add `ADR-` entries for durable architecture or ownership decisions.
+- [ ] Add `SCH-` entries for schema, catalog, or stable-ID contract changes.
+- [ ] Keep the active `AI-` row current if scope or blockers change.
+
+### Before Finishing
+
+- [ ] Update the active `AI-` row status.
+- [ ] Record concrete outputs.
+- [ ] Record verification performed.
+- [ ] Update `roadmap.md`, `repo-inventory.md`, `decisions.md`,
+      `discoveries.md`, `remediation-backlog.md`, or `schema-changelog.md` if
+      the task changed information owned by those files.
+- [ ] Run `make validate-ai-tracking` from `.github/`.
+- [ ] If committing is authorized and the worktree contains only intended
+      changes, commit with a subject beginning with the task ID.
+
+## Commit Protocol
+
+Completed AI discoverability work should be committed as one logical commit per
+completed `AI-` task when commit behavior is authorized.
+
+Commit subject format:
+
+```text
+AI-000: short imperative summary
+```
+
+Safe commit rules:
+
+1. Run `git status --short` first.
+2. Commit only files related to the active task.
+3. Do not commit unrelated user changes.
+4. If unrelated changes are present, leave them unstaged and report them.
+5. If unsure whether a file belongs to the active task, do not commit it.
+
+Examples:
+
+```text
+AI-018: add tracking lifecycle rules
+AI-019: add AI tracking validator
+AI-020: add AI tracking validation make target
+```
+
 ## Discovery Triage
 
 When implementation reveals a gap, use this decision flow:
@@ -186,4 +248,3 @@ The tracking system manages the project that produces and maintains:
 
 The root catalog is for AI consumption. This directory is for project
 management and implementation history.
-

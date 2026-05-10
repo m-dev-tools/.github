@@ -30,6 +30,9 @@ this file during every implementation session.
 | AI-015 | 5 | Recipes | Add add-stdlib-module recipe | .github | todo | AI-012 | recipe doc | recipe walkthrough |
 | AI-016 | 5 | Recipes | Add add-lint-rule recipe | .github | todo | AI-010 | recipe doc | recipe walkthrough |
 | AI-017 | 6 | CI | Add catalog validation CI | .github | todo | AI-006 AI-007 | CI workflow | CI passes |
+| AI-018 | 1 | Tracking | Add required lifecycle and commit protocol instructions | .github | done | | `how-to-track.md` lifecycle rules | `make validate-ai-tracking` |
+| AI-019 | 1 | Tracking | Add AI tracking validation script | .github | done | | `scripts/validate-tracking.py` | `make validate-ai-tracking` |
+| AI-020 | 1 | Tracking | Add Makefile target for tracking and catalog validation | .github | done | AI-019 | `Makefile` target | `make validate-ai-tracking` |
 
 ## How To Add A Task
 
@@ -39,4 +42,3 @@ this file during every implementation session.
 4. Name the owner repo.
 5. Add concrete outputs and verification.
 6. Link any blocking `AI-`, `REM-`, or `ADR-` IDs.
-
