@@ -178,6 +178,7 @@
         "tool:m-stdlib"
       ],
       "dockerfile_url": "https://raw.githubusercontent.com/m-dev-tools/m-test-engine/main/docker/Dockerfile",
+      "engine_contract_url": "https://raw.githubusercontent.com/m-dev-tools/m-test-engine/main/dist/m-test-engine.json",
       "id": "tool:m-test-engine",
       "language": "dockerfile",
       "license": "AGPL-3.0",
@@ -186,7 +187,7 @@
       "repo_meta_url": "https://raw.githubusercontent.com/m-dev-tools/m-test-engine/main/dist/repo.meta.json",
       "role": "Minimal YottaDB Docker container — lightweight default test substrate for m-cli + m-stdlib",
       "status": "active",
-      "verified_on": "2026-05-10"
+      "verified_on": "2026-05-11"
     },
     "tree-sitter-m": {
       "agent_instructions": "https://github.com/m-dev-tools/tree-sitter-m/blob/main/AGENTS.md",
