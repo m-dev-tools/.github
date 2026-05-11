@@ -486,15 +486,15 @@ same Phase-0 contract, applied to six more repos.
   — the MCP server repo. v0.1.0 wheel attached to the
   [v0.1.0 release](https://github.com/m-dev-tools/m-dev-tools-mcp/releases/tag/v0.1.0).
 
-### Phase 5 outlook
+### Phase 5 — in flight
 
-Continuous enforcement hardening. Four follow-up streams listed in
-[`AI-discoverability-plan.md` §6.2 + §6.3](AI-discoverability-plan.md):
-freshness gates (warn when `verified_on` drifts), link-checking
-(`make link-check` over `llms.txt` + every `*_url` field),
-license-reconcile (mismatch between declared license and LICENSE
-file), schema-version policing (when `schema_compat` bumps, every
-consumer must announce compatibility).
+Continuous enforcement hardening. Plan landed 2026-05-11 at
+[`phases/phase5-plan.md`](phases/phase5-plan.md). Five tracks
+(A freshness, B link-check, C license-reconcile, D schema-compat,
+E close-out evidence) — each ships one new `profile/build/check-*.py`
+gate, one Make target, and one CI step. Tracks A through D are
+independent; can ship in any order or in parallel.
 
-No phase plan exists yet — the first move when Phase 5 starts is
-`docs/ai-discoverability/phases/phase5-plan.md`.
+Phase 5 is the operational-loop close: once it lands, every
+architectural promise in the framework has an automated watchdog and
+human discipline stops being the load-bearing path.
