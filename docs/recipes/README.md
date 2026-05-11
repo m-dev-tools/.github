@@ -56,8 +56,8 @@ Frontmatter contract:
 
 ## The seven priority recipes
 
-Per [`AI-discoverability-plan.md` §5.1](../AI-discoverability-plan.md) and
-the [Phase-3 implementation plan](../phase3-plan.md):
+Per [`AI-discoverability-plan.md` §5.1](../ai-discoverability/AI-discoverability-plan.md) and
+the [Phase-3 implementation plan](../ai-discoverability/phase3-plan.md):
 
 | # | Slug | Tier | Phase-3 status | What it proves |
 |---|---|---|---|---|
@@ -69,7 +69,7 @@ the [Phase-3 implementation plan](../phase3-plan.md):
 | 6 | `investigate-failure` | tier-2 | **post-exit** | Standard triage path when `m test` is red |
 | 7 | `add-editor-support` | tier-3 | **post-exit** | Extend the VS Code extensions with a new file association / setting |
 
-Phase-3 exit per [`phase3-plan.md`](../phase3-plan.md): at least **4 of
+Phase-3 exit per [`phase3-plan.md`](../ai-discoverability/phase3-plan.md): at least **4 of
 the 7** are written + executable + CI-verified. Recipes 1–4 are the
 exit set; #5 is buffer; #6 + #7 land after Phase 3 closes.
 
@@ -114,10 +114,11 @@ follow to recipe → run recipe → assert exit code.
 
 ## What this directory is NOT
 
-- A general documentation tree. That's [`../`](../) — for plans,
-  guides, and history.
+- A general documentation tree. That's [`../ai-discoverability/`](../ai-discoverability/)
+  (plans + evidence + the parent guide) and [`../history/`](../history/)
+  (archived prose).
 - A test corpus. That's `m-modern-corpus` (and, by reach, the VistA
   corpus surfaced via `tree-sitter-m`).
 - A tutorial. Recipes are mechanically-runnable; tutorials are prose
   that explains why. The user-facing guide lives in
-  [`../AI-discoverability-guide.md`](../AI-discoverability-guide.md).
+  [`../ai-discoverability/AI-discoverability-guide.md`](../ai-discoverability/AI-discoverability-guide.md).
