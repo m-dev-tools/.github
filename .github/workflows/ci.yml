@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate catalog JSON
+        # tools.json + tools.schema.json must remain valid JSON. The
+        # full Phase-1 catalog-build pipeline (build-catalog.py +
+        # validate-catalog.py) lands later; for now we gate on
+        # parseability.
+        run: make validate-catalog
+
+      - name: docs/ prose-only gate
+        # Cross-repo guardrail: docs/ holds only human-readable prose.
+        # Non-prose artifacts (data, output, metadata, examples) belong
+        # under a top-level domain-specific directory. Engine-free
+        # find-based check; same target lands in every tier-1 repo.
+        run: make check-docs-prose
