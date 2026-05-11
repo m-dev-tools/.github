@@ -19,6 +19,12 @@ follows when sitting down to do the work.
   eliminates them. Read this first if you run more than one agent
   session at once.
 
+- **[`multi-session-worktrees-guide.md`](multi-session-worktrees-guide.md)**
+  — Day-to-day operational manual for the worktree convention named
+  by Rule 2 above: layout, setup, daily usage, cleanup, gotchas,
+  bootstrap script. Read this when you start running more than one
+  session against the same repo.
+
 ## Audience
 
 Anyone (human or agent) doing implementation work across multiple repos

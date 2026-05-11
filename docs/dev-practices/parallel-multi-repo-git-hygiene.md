@@ -109,6 +109,12 @@ cd ../m-cli-wt-featX && claude
 Worktrees share the underlying `.git` object store but have fully
 isolated working trees and index files. No `index.lock` contention.
 
+See [`multi-session-worktrees-guide.md`](multi-session-worktrees-guide.md)
+for the full layout convention, setup / cleanup / pruning commands,
+gotchas (direnv, `.venv/`, pytest cache, branch-already-checked-out
+errors), and a bootstrap script for adopting worktrees across the
+existing org.
+
 ### Rule 3 — Cross-repo features go sequentially, leaves first
 
 When an `m-cli` feature needs a new `m-stdlib` primitive:
