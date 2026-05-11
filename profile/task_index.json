@@ -278,18 +278,18 @@
     "history": {
       "why_does_m_dev_tools_exist": {
         "intent": "Read the original gap analysis that justified the org",
-        "primary": "tool:m-tools",
-        "doc": "https://github.com/m-dev-tools/m-tools/blob/main/docs/gap-analysis-and-remediation-strategy.md"
+        "primary": "doc:m-dev-tools#gap-analysis-and-remediation-strategy",
+        "doc": "https://github.com/m-dev-tools/.github/blob/main/docs/history/gap-analysis-and-remediation-strategy.md"
       },
       "go_rust_python_analogues": {
         "intent": "How does m-cli map to go/cargo/poetry?",
-        "primary": "tool:m-tools",
-        "doc": "https://github.com/m-dev-tools/m-tools/blob/main/docs/m-tool-gap-analysis.md"
+        "primary": "doc:m-dev-tools#m-tool-gap-analysis",
+        "doc": "https://github.com/m-dev-tools/.github/blob/main/docs/history/m-tool-gap-analysis.md"
       },
       "tier1_strategy": {
         "intent": "What was the original Tier 1 deliverable scope?",
-        "primary": "tool:m-tools",
-        "doc": "https://github.com/m-dev-tools/m-tools/blob/main/docs/m-tooling-tier1.md"
+        "primary": "doc:m-dev-tools#m-tooling-tier1",
+        "doc": "https://github.com/m-dev-tools/.github/blob/main/docs/history/m-tooling-tier1.md"
       }
     }
   }

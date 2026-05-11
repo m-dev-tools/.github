@@ -167,17 +167,6 @@
       "status": "active",
       "verified_on": "2026-05-10"
     },
-    "m-tools": {
-      "agent_instructions": "https://github.com/m-dev-tools/m-tools/blob/main/README.md",
-      "id": "tool:m-tools",
-      "language": "markdown",
-      "license": "AGPL-3.0",
-      "notes": "Read for: why the ecosystem is shaped the way it is. See m-tools/docs/m-tool-gap-analysis.md for the Go/Rust/Python comparison that drove m-cli's CLI ergonomics. preserved_docs: docs/gap-analysis-and-remediation-strategy.md, docs/m-tool-gap-analysis.md, docs/m-tooling-tier1.md, docs/implementation.md.",
-      "repo": "https://github.com/m-dev-tools/m-tools",
-      "role": "ARCHIVED — historical seed of the entire org. Original gap analysis + Tier 1–4 strategy + canonical command map.",
-      "status": "archived",
-      "verified_on": "2026-05-10"
-    },
     "tree-sitter-m": {
       "agent_instructions": "https://github.com/m-dev-tools/tree-sitter-m/blob/main/AGENTS.md",
       "consumed_by": [
