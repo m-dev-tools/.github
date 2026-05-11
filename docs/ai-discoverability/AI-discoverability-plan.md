@@ -298,30 +298,33 @@ protocol. Three tools:
 One Python file (~150 LOC). Turns the catalog into a first-class protocol
 surface instead of "go read these files."
 
-**Distribution:** GitHub-first, not PyPI. Ships as a pre-built wheel attached
-to a GitHub Release — same pattern `tree-sitter-m` uses for its Python
-binding (see CONTRIBUTING.md § "Parser repo"). PyPI publishing is **deferred
-until external usage validates the API + name** — a published PyPI name +
-version is permanent (yank-only, not delete), and Phase 4 is the first time
-the `route_intent` / `describe` / `verify` surface gets real-agent use. The
-cost of a regretted PyPI publish is much higher than the cost of waiting.
+**Distribution.** Originally GitHub-Release-wheel-only (Phase 4 v0.1.0
+shipped that way); the **PyPI deferral was reversed at Phase 6
+planning** because publishing to the official MCP registry
+(`registry.modelcontextprotocol.io`) requires the server be reachable
+through a registry-supported channel — and PyPI is the natural fit for
+a Python package. The original concern (permanent PyPI namespace +
+yank-only versions) is now mitigated by Phase 4 having already
+shipped a real-agent-tested v0.1.0 via the GitHub Release path; the
+API surface (`route_intent` / `describe` / `verify`) is no longer
+speculative.
 
-Users install via either form:
+Channels, in order of recommended use:
 
-```bash
-# Pre-built wheel from a tagged GitHub Release (fast, no Python build):
-pip install https://github.com/m-dev-tools/m-dev-tools-mcp/releases/download/v<X.Y>/m_dev_tools_mcp-<X.Y>-py3-none-any.whl
+1. **PyPI** — `pip install m-dev-tools-mcp` or
+   `uvx m-dev-tools-mcp`. This is the primary channel and what the
+   MCP registry's `server.json` declares.
+2. **GitHub Release wheel** — `pip install
+   https://github.com/m-dev-tools/m-dev-tools-mcp/releases/download/v<X.Y>/m_dev_tools_mcp-<X.Y>-py3-none-any.whl`.
+   Stays available for environments that can't reach PyPI.
+3. **Source via `uvx` + git tag** —
+   `uvx --from git+https://github.com/m-dev-tools/m-dev-tools-mcp@v<X.Y> m-dev-tools-mcp`.
+   Still works; useful for testing pre-release commits.
 
-# Or uvx, source-build pinned to a tag or commit:
-uvx --from git+https://github.com/m-dev-tools/m-dev-tools-mcp@v<X.Y> m-dev-tools-mcp
-```
-
-The MCP-client config (Claude Desktop / Codex / Continue / etc.) points at
-the `m-dev-tools-mcp` binary that either install path provides.
-
-PyPI publishing is in scope as a **follow-up after Phase 5** if external
-adoption demonstrates the name + API surface are worth the irreversible
-commitment. Until then, the GitHub-Release wheel is the canonical artifact.
+The MCP-client config (Claude Desktop / Codex / Continue / etc.)
+points at the `m-dev-tools-mcp` binary any install path provides.
+See Phase 6 below for the registry listing that makes config-less
+discovery possible.
 
 ---
 
@@ -419,8 +422,10 @@ new-app-TDD-CI recipe top-to-bottom against a fresh clone, with green CI.
 ### Phase 4 — Tier-3 repos + MCP server
 
 Goal: VS Code extensions and `m-cli-extras` ship `repo.meta.json`. Ship
-`m-dev-tools-mcp` as a GitHub-Release wheel (not PyPI — see §5.3 for the
-deferral rationale).
+`m-dev-tools-mcp` as a GitHub-Release wheel — PyPI follows in Phase 6
+once registry-listing requires it (Phase 4 closed pre-PyPI per the
+original §5.3 deferral; §5.3 was updated at Phase 6 planning to
+reverse the deferral).
 
 **Exit:** Claude/Codex/Continue can be pointed at the MCP server (installed
 via `pip install https://github.com/m-dev-tools/m-dev-tools-mcp/releases/download/v<X.Y>/...whl`
@@ -432,6 +437,45 @@ with `module:m-stdlib#STDJSON`.
 Goal: freshness, link-check, license-reconcile gates running weekly in CI.
 
 **Exit:** a stale catalog or broken link is caught within 7 days.
+
+### Phase 6 — Distribution surface (broaden client reach)
+
+Goal: ship `m-dev-tools-mcp` through every distribution channel an
+MCP client is likely to consult, so a user doesn't have to
+hand-roll a `.mcp.json` to use it.
+
+Required ships:
+
+1. **PyPI publication.** `m-dev-tools-mcp` ships as a regular Python
+   package via `uv publish`. Reverses the §5.3 deferral — see that
+   section's updated rationale. PyPI is the official MCP registry's
+   accepted Python package channel; the registry-listing step
+   below references the PyPI entry.
+2. **Official MCP registry listing.** Publish
+   `io.github.m-dev-tools/m-dev-tools-mcp` to
+   [`registry.modelcontextprotocol.io`](https://registry.modelcontextprotocol.io/)
+   via the `mcp-publisher` CLI. Adds a `server.json` to the
+   `m-dev-tools-mcp` repo root with `registryType: pypi`;
+   `mcp-publisher publish` lands it in the registry. Once listed,
+   any registry-aware client (Codex, Continue, Goose, …)
+   auto-discovers without `.mcp.json` config.
+3. **Maintenance:** every release tag (`v0.1.1`, `v0.2.0`, …)
+   triggers `uv publish` to PyPI **and** `mcp-publisher publish` to
+   the registry from a GitHub-Actions workflow in `m-dev-tools-mcp`.
+   PyPI auth via Trusted Publisher (OIDC, no stored tokens);
+   `mcp-publisher` auth via GitHub OIDC mode for the same reason.
+
+Optional (deferred until external adoption demand):
+
+- **VS Code extension** bundling the MCP server for the
+  VS Code / Cursor audience specifically. Sibling to the existing
+  `tree-sitter-m-vscode` and `m-stdlib-vscode` Tier-3 repos.
+
+**Exit:** a fresh-install MCP-capable client points at the registry
+and resolves `route_intent("parse JSON in M")` without any
+hand-written client-side config. The catalog's `tools.json` entry
+for `m-dev-tools-mcp` carries a `registry_url` field pointing at
+the live registry record.
 
 ---
 
@@ -484,7 +528,7 @@ that requires careful agent prompting — encoded in `AGENTS.md` and
 | Each repo | `AGENTS.md`, `dist/repo.meta.json`, `dist/<kind>.json`, `make check-manifest` | yes (small, repo-local) |
 | Meta-repo | `llms.txt`, `README.md`, `task_index.json`, schemas, build scripts, CI, recipes | yes (routing only) |
 | Meta-repo (generated) | `tools.json` | **no** |
-| External | `m-dev-tools-mcp` (GitHub-Release wheel; PyPI deferred — see §5.3) | yes |
+| External | `m-dev-tools-mcp` (Python package — PyPI + GitHub-Release wheel + official MCP registry listing per §5.3 + Phase 6) | yes |
 
 That is the entire surface area. Everything else lives in the repo that owns
 the facts.
