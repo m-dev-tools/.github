@@ -384,6 +384,42 @@ repo root, the generator resolves it against the raw-content prefix.
    the M toolchain isn't installed in CI; full executable
    verification is a maintainer task when bumping `verified_on`).
 
+### 4.6 Ship the MCP server through a new distribution channel
+
+The MCP server (`m-dev-tools-mcp`) is currently distributed through
+three channels: a `uvx --from git+...@<tag>` install, a GitHub
+Release wheel, and the public **MCP registry** at
+[`registry.modelcontextprotocol.io`](https://registry.modelcontextprotocol.io/)
+under the namespace `io.github.m-dev-tools/m-dev-tools-mcp`.
+Registry-aware clients (Codex, Continue, Goose, …) discover the
+server without a hand-written `.mcp.json`.
+
+To add a new channel (PyPI, a VS Code extension bundling the
+server, a Homebrew tap, …):
+
+1. Decide whether the channel is worth the recurring maintenance.
+   The MCP registry is one PR per release tag via the
+   `mcp-publisher` CLI; a VS Code extension carries the maintenance
+   cost of the entire marketplace surface.
+2. Add the install path to the
+   [`docs/ai-discoverability/ai-users-guide.md`](ai-users-guide.md)
+   "For humans" section under §A.1.
+3. If the channel exposes a new pointer URL (e.g. a Marketplace
+   listing), add it as an `exposes` field on
+   `m-dev-tools-mcp/dist/repo.meta.json` — the catalog's
+   `build-catalog.py` will surface it as a `<kind>_url` on the
+   `tools.m-dev-tools-mcp` entry on the next `make catalog`.
+4. If the channel needs versioned releases, wire the publish step
+   into `m-dev-tools-mcp/.github/workflows/release.yml` so every
+   `v*` tag fires it.
+
+The registry-listing step uses `mcp-publisher login github`
+(browser OAuth) and `mcp-publisher publish` — these require a real
+human at a browser, so document the steps for the maintainer rather
+than expecting CI to do it (GitHub OIDC auth in
+`mcp-publisher login github-oidc` mode is the CI-friendly path for
+later automation).
+
 ---
 
 ## 5. Operational invariants
@@ -484,7 +520,14 @@ same Phase-0 contract, applied to six more repos.
   recipes.
 - [`m-dev-tools-mcp`](https://github.com/m-dev-tools/m-dev-tools-mcp)
   — the MCP server repo. v0.1.0 wheel attached to the
-  [v0.1.0 release](https://github.com/m-dev-tools/m-dev-tools-mcp/releases/tag/v0.1.0).
+  [v0.1.0 release](https://github.com/m-dev-tools/m-dev-tools-mcp/releases/tag/v0.1.0);
+  also published to the
+  [official MCP registry](https://registry.modelcontextprotocol.io/)
+  as `io.github.m-dev-tools/m-dev-tools-mcp` (Phase 6).
+- [`docs/ai-discoverability/ai-users-guide.md`](ai-users-guide.md)
+  — the consumer-facing front door (Part A for human developers,
+  Part B for AI agents). Read this if you're using the framework
+  rather than extending it.
 
 ### Phase 5 — closed 2026-05-11
 

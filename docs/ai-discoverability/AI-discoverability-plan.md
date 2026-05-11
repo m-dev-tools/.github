@@ -433,6 +433,38 @@ Goal: freshness, link-check, license-reconcile gates running weekly in CI.
 
 **Exit:** a stale catalog or broken link is caught within 7 days.
 
+### Phase 6 — Distribution surface (broaden client reach)
+
+Goal: ship `m-dev-tools-mcp` through every distribution channel an
+MCP client is likely to consult, so a user doesn't have to
+hand-roll a `.mcp.json` to use it.
+
+Required ships:
+
+1. **Official MCP registry listing.** Publish
+   `io.github.m-dev-tools/m-dev-tools-mcp` to
+   [`registry.modelcontextprotocol.io`](https://registry.modelcontextprotocol.io/)
+   via the `mcp-publisher` CLI. Adds a `server.json` to the
+   `m-dev-tools-mcp` repo root; `mcp-publisher publish` lands it
+   in the registry. Once listed, any registry-aware client (Codex,
+   Continue, Goose, …) auto-discovers without `.mcp.json` config.
+2. **Maintenance:** every release tag (`v0.1.1`, `v0.2.0`, …)
+   triggers `mcp-publisher publish` from a GitHub-Actions workflow
+   in `m-dev-tools-mcp`, so the registry stays in sync.
+
+Optional (deferred until external adoption demand):
+
+- **PyPI.** Same deferral rationale as §5.3.
+- **VS Code extension** bundling the MCP server for the
+  VS Code / Cursor audience specifically. Sibling to the existing
+  `tree-sitter-m-vscode` and `m-stdlib-vscode` Tier-3 repos.
+
+**Exit:** a fresh-install MCP-capable client points at the registry
+and resolves `route_intent("parse JSON in M")` without any
+hand-written client-side config. The catalog's `tools.json` entry
+for `m-dev-tools-mcp` carries a `registry_url` field pointing at
+the live registry record.
+
 ---
 
 ## 8. Explicit Non-Goals

@@ -1,57 +1,107 @@
 ---
 created: 2026-05-11
 last_modified: 2026-05-11
-revisions: 0
+revisions: 1
 doc_type: [GUIDE]
 lifecycle: active
 owner: rmrich5
 connections: [function]
-title: "m-dev-tools — AI user's guide"
+title: "m-dev-tools — users guide"
 ---
 
-# m-dev-tools — AI user's guide
+# m-dev-tools — users guide
 
-> The front door for using `m-dev-tools` as an LLM-based agent or
-> automated tool. Read this when you want an agent (Claude Code,
-> Codex, Continue, …) to route plain-English questions about M
-> tooling to the right repo without you hand-holding it.
+> The front door for **using** m-dev-tools, split between human
+> developers (you, configuring an agent) and AI agents (the agent
+> itself, reading this guide to understand what's available). If
+> you're *extending* the framework rather than using it, the
+> foundational reference is
+> [`AI-discoverability-architecture.md`](AI-discoverability-architecture.md).
 
-If you're building the framework itself or extending its
-enforcement coverage, the foundational reference is
-[`AI-discoverability-architecture.md`](AI-discoverability-architecture.md).
-This guide is the *consumer* counterpart: how to wire your agent in
-and what it can do once you have.
+## Table of contents
+
+- [1. What's available](#1-whats-available)
+- [Part A — For humans (developers + teams)](#part-a--for-humans-developers--teams)
+  - [A.1 Quickest path: install the MCP server in your IDE](#a1-quickest-path-install-the-mcp-server-in-your-ide)
+  - [A.2 Alternative: direct catalog access (no MCP)](#a2-alternative-direct-catalog-access-no-mcp)
+  - [A.3 Smoke-test the wiring](#a3-smoke-test-the-wiring)
+  - [A.4 Troubleshooting](#a4-troubleshooting)
+  - [A.5 Reporting issues](#a5-reporting-issues)
+- [Part B — For AI agents (reading this to know what to do)](#part-b--for-ai-agents-reading-this-to-know-what-to-do)
+  - [B.1 Tools you have access to](#b1-tools-you-have-access-to)
+  - [B.2 Typed-ID grammar you'll see](#b2-typed-id-grammar-youll-see)
+  - [B.3 Example session](#b3-example-session)
+  - [B.4 What you will and will not do](#b4-what-you-will-and-will-not-do)
+  - [B.5 If you don't have MCP support](#b5-if-you-dont-have-mcp-support)
+- [3. Where to learn more (shared)](#3-where-to-learn-more-shared)
 
 ---
 
-## 1. What "AI-enabled" means here
+## 1. What's available
 
 The org publishes three machine-readable artifacts at known URLs:
 
 - **`llms.txt`** — < 40-line entry point (the standard
   [llmstxt.org](https://llmstxt.org/) format).
 - **`tools.json`** — generated catalog of every repo, every
-  exposes-URL, every consumes-edge. One line per repo + pointer URLs
-  to deeper manifests.
+  exposes-URL, every consumes-edge.
 - **`task_index.json`** — hand-curated mapping from plain-English
-  intent (`"parse JSON in M"`) to typed IDs (`module:m-stdlib#STDJSON`).
+  intent (`"parse JSON in M"`) to typed IDs
+  (`module:m-stdlib#STDJSON`).
 
-Plus a thin **MCP server** that wraps all three behind three tools
-your agent can call directly: `route_intent`, `describe`, `verify`.
+Plus a thin **MCP server** (`m-dev-tools-mcp`) that wraps all three
+behind three tools any MCP-capable agent can call: `route_intent`,
+`describe`, `verify`. The server is published to the **official MCP
+registry** at
+[`registry.modelcontextprotocol.io`](https://registry.modelcontextprotocol.io/)
+under the namespace `io.github.m-dev-tools/m-dev-tools-mcp` — so
+MCP clients that browse the registry pick it up without
+hand-rolling a config file.
 
 Continuous-enforcement gates ([Phase 5
 evidence](phases/phase5-evidence.md)) keep `verified_on` fresh, URLs
 live, declared licenses honest, and schema changes documented — so
 the agent isn't reading stale facts.
 
-## 2. Two install paths
+---
 
-Pick one based on how your agent loads tools.
+## Part A — For humans (developers + teams)
 
-### Path A — MCP (recommended)
+You're a developer who wants their AI assistant to give correct
+answers about m-dev-tools without you supervising every step. This
+part is about the wiring.
 
-Drop this into your project's `.mcp.json` (Claude Code, Codex,
-Continue, any MCP-capable agent):
+### A.1 Quickest path: install the MCP server in your IDE
+
+Pick the option that matches the AI extension you're using.
+
+#### Option 1 — GitHub Copilot Chat (VS Code, agent mode)
+
+Create `.vscode/mcp.json` at your workspace root:
+
+```json
+{
+  "servers": {
+    "m-dev-tools": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/m-dev-tools/m-dev-tools-mcp@v0.1.0",
+        "m-dev-tools-mcp"
+      ]
+    }
+  }
+}
+```
+
+Open Copilot Chat → switch to **Agent** mode → the three tools
+(`route_intent`, `describe`, `verify`) appear in the tool list.
+
+#### Option 2 — Claude Code (anthropic.claude-code extension or terminal)
+
+Create `.mcp.json` at your workspace root (or
+`~/.config/claude/.mcp.json` for user-level):
 
 ```json
 {
@@ -68,24 +118,40 @@ Continue, any MCP-capable agent):
 }
 ```
 
-Pin to `@v0.1.0` for reproducibility, or `@main` to ride latest.
+Reload Claude Code. Ask `list your MCP tools` → expect
+`route_intent`, `describe`, `verify`.
 
-Confirm the server registered:
+#### Option 3 — Any MCP-capable agent via the public registry
 
-```bash
-claude --print "list your MCP tools"
-# expected: route_intent, describe, verify
+If your client supports the MCP registry directly (e.g. modern
+Codex, Continue, Goose, …), point it at the registry entry:
+
+```
+io.github.m-dev-tools/m-dev-tools-mcp
 ```
 
-Three tools become available:
+The client fetches the server's `server.json` metadata from
+`registry.modelcontextprotocol.io` and configures itself. No
+hand-rolled `.mcp.json` needed.
 
-| Tool | Signature | Returns |
-|---|---|---|
-| `route_intent` | `(query: str) -> list[str]` | Typed IDs matching the intent. Example: `"parse JSON in M"` → `["module:m-stdlib#STDJSON"]`. |
-| `describe` | `(typed_id: str) -> dict` | Pointer-blob with `manifest_url`, `agent_instructions`, `verification_commands`. Supports `tool:` / `module:` / `cmd:` / `recipe:` kinds. Returns URLs the caller should fetch next — never inlines payloads. |
-| `verify` | `(repo: str) -> list[str]` | Lists a repo's declared `verification_commands`. **Does not execute them** — that's your decision. |
+#### Prerequisite — `uv` (provides `uvx`)
 
-### Path B — raw catalog (no MCP)
+Required for Options 1 and 2. One-line install:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Option 3 (registry-driven) does not require `uv` on your machine —
+the client decides how to launch the server.
+
+#### Pin to a version
+
+`@v0.1.0` is pinned to the released tag. Use `@main` to ride latest
+(see [Releases](https://github.com/m-dev-tools/m-dev-tools-mcp/releases)
+for what's in each tag).
+
+### A.2 Alternative: direct catalog access (no MCP)
 
 If your agent doesn't support MCP, point it at the three raw URLs
 directly:
@@ -94,123 +160,169 @@ directly:
 - `https://raw.githubusercontent.com/m-dev-tools/.github/main/profile/tools.json`
 - `https://raw.githubusercontent.com/m-dev-tools/.github/main/profile/task_index.json`
 
-The agent then walks the routing trail itself: find an intent row in
-`task_index.json`, follow `primary` → `tools.<key>.<kind>_url`, fetch
-the manifest. The 8-step handshake in
+The agent then walks the routing trail itself: find an intent row,
+follow `primary` → `tools.<key>.<kind>_url`, fetch the manifest. The
+8-step handshake in
 [`AI-discoverability-architecture.md` §3.1](AI-discoverability-architecture.md#31-the-discovery-handshake--bidirectional-contract)
 spells out the canonical sequence.
 
-The MCP server (Path A) is a thin wrapper over exactly this flow —
-it doesn't have hidden behavior the raw catalog can't reproduce.
+The MCP server is a thin wrapper over exactly this flow — it doesn't
+have hidden behavior the raw catalog can't reproduce.
 
-## 3. Example session — Claude Code
+### A.3 Smoke-test the wiring
 
-User opens a project that has the `.mcp.json` from §2.
+Don't want to open an agent just to find out the install is broken?
+Shell the MCP server's CLI mode directly:
 
-```
-> How do I parse a JSON string in M into a tree?
-
-(Claude calls route_intent("parse JSON in M"))
-→ ["module:m-stdlib#STDJSON"]
-
-(Claude calls describe("module:m-stdlib#STDJSON"))
-→ { typed_id, symbol: "STDJSON",
-    manifest_url: "https://raw.githubusercontent.com/m-dev-tools/m-stdlib/main/dist/stdlib-manifest.json",
-    tool: { typed_id: "tool:m-stdlib",
-            repo: "https://github.com/m-dev-tools/m-stdlib",
-            agent_instructions: "…/AGENTS.md",
-            modules_url: "…/dist/stdlib-manifest.json" } }
-
-(Claude fetches stdlib-manifest.json, finds parse^STDJSON's signature
-+ worked example)
-
-Claude: Use `parse^STDJSON(jsonText, .tree)`. It populates `tree`
-with one node per JSON value; strings get the prefix "s:". Worked
-example: …
+```bash
+uvx --from "git+https://github.com/m-dev-tools/m-dev-tools-mcp@v0.1.0" \
+    m-dev-tools-mcp --tool route_intent --query "parse JSON in M"
+# expected: ["module:m-stdlib#STDJSON"]
 ```
 
-The key invariant: Claude never guesses the API surface — every
-claim is grounded in a manifest URL the agent actually fetched.
-
-## 4. Example session — agent-free shell smoke
-
-Don't want to open an agent? `examples/claude-code/smoke.sh` (in the
-[m-dev-tools-mcp repo](https://github.com/m-dev-tools/m-dev-tools-mcp/tree/v0.1.0/examples/claude-code))
-shells the same `route_intent` query through the MCP server's CLI
-mode and asserts the canonical typed ID lands in the response:
+Or clone and run the canned smoke:
 
 ```bash
 git clone https://github.com/m-dev-tools/m-dev-tools-mcp
 cd m-dev-tools-mcp
 ./examples/claude-code/smoke.sh
-# → "module:m-stdlib#STDJSON"
 ```
 
-Useful for CI or as a quick sanity check after install.
+If either exits 0 with the typed ID, the server itself works; any
+remaining issue is on the IDE-config side.
 
-## 5. The four typed-ID kinds your agent will see
+### A.4 Troubleshooting
 
-| Kind | Example | What it points at |
+| Symptom | Fix |
+|---|---|
+| `uvx: command not found` | Install `uv`: `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
+| Copilot Chat shows no `route_intent` tool | Confirm `.vscode/mcp.json` is in the workspace root, switch to **Agent** mode, restart VS Code |
+| Claude Code "list your MCP tools" returns nothing | Confirm `.mcp.json` is in the workspace root or `~/.config/claude/`; reload Claude Code |
+| Server crashes on launch | You're probably pinned to `@main` and HEAD landed broken. Pin to `@v0.1.0` (or a later release tag) |
+| `route_intent` returns `[]` for everything | The catalog isn't reachable. Check internet; the server does live fetches over HTTPS, no offline mode |
+| A tool returns a stale `verified_on` | The weekly cron in `.github`'s CI catches stale within 7 days. Don't want to wait? File an issue on the relevant repo |
+
+### A.5 Reporting issues
+
+- **MCP-server bugs** (wrong typed ID, server crashes on a query) →
+  <https://github.com/m-dev-tools/m-dev-tools-mcp/issues>
+- **Catalog bugs** (404'd `*_url`, wrong intent routing, missing
+  recipe) →
+  <https://github.com/m-dev-tools/.github/issues>
+- **Per-repo bugs** (e.g. `STDJSON` behavior differs from the
+  manifest) → file on the owning repo. `describe`'s response
+  includes the repo URL — go straight there.
+
+---
+
+## Part B — For AI agents (reading this to know what to do)
+
+You're an agent. A user just registered the `m-dev-tools` MCP server
+or pointed you at the catalog directly. This part tells you what
+you can call and what to do with it.
+
+### B.1 Tools you have access to
+
+If MCP is wired up (the common case — `.mcp.json` or registry
+entry), you have three tools:
+
+| Tool | Signature | Returns |
 |---|---|---|
-| `tool:` | `tool:m-cli` | A repo (m-cli, m-stdlib, …). `describe` returns the repo's `*_url` pointers + agent_instructions + verification_commands. |
-| `module:` | `module:m-stdlib#STDJSON` | A symbol in a repo's manifest. `describe` resolves to the manifest URL for fetching signatures + examples. |
-| `cmd:` | `cmd:m-cli#test` | An m-cli subcommand. `describe` returns `commands_url` (the per-subcommand manifest) + parent tool. |
-| `recipe:` | `recipe:new-app-tdd-ci` | A mechanically-runnable workflow under `docs/recipes/`. `describe` returns the recipe's HTTPS + raw URLs. |
+| `route_intent` | `(query: str) -> list[str]` | Typed IDs matching the intent. Example: `"parse JSON in M"` → `["module:m-stdlib#STDJSON"]`. First call when a user asks about M tooling. |
+| `describe` | `(typed_id: str) -> dict` | Pointer-blob with `manifest_url`, `agent_instructions`, `verification_commands`. Supports `tool:` / `module:` / `cmd:` / `recipe:` kinds. **Returns URLs, never inlines payloads.** |
+| `verify` | `(repo: str) -> list[str]` | Lists a repo's declared `verification_commands`. **Does not execute them** — see §B.4. |
 
-Other kinds (`rule:` / `doc:` / `data:` / `workflow:` / `task:`)
-exist in the typed-ID grammar but `describe` currently handles the
-four above. Adding a kind is a small change — file an issue if you
-need it.
+The MCP framework gives you a JSON schema for each tool's parameters
+on connect; you don't have to memorize the signatures from this
+doc.
 
-## 6. What the agent will and will not do
+### B.2 Typed-ID grammar you'll see
+
+Pattern:
+`^(tool|cmd|module|rule|doc|data|workflow|task|recipe):[a-z0-9_-]+(#[A-Za-z0-9._-]+)?$`
+
+| Kind | Example | What `describe` returns |
+|---|---|---|
+| `tool:` | `tool:m-cli` | The repo's `*_url` pointers + `agent_instructions` + `verification_commands` |
+| `module:` | `module:m-stdlib#STDJSON` | The `manifest_url` for fetching signatures + worked examples; parent tool pointer |
+| `cmd:` | `cmd:m-cli#test` | The `commands_url` (per-subcommand manifest) + parent tool |
+| `recipe:` | `recipe:new-app-tdd-ci` | HTTPS + raw URLs of a mechanically-runnable recipe under `docs/recipes/` |
+
+`rule:` / `doc:` / `data:` / `workflow:` / `task:` are valid in the
+grammar but not currently handled by `describe`. If you encounter
+one, return the typed ID to the user as a citation rather than
+attempting to resolve it.
+
+### B.3 Example session
+
+User: *"How do I parse a JSON string in M into a tree?"*
+
+```
+call route_intent("parse JSON in M")
+  → ["module:m-stdlib#STDJSON"]
+
+call describe("module:m-stdlib#STDJSON")
+  → { typed_id, symbol: "STDJSON",
+      manifest_url: "…/m-stdlib/main/dist/stdlib-manifest.json",
+      tool: { repo, agent_instructions, modules_url, … } }
+
+fetch manifest_url (HTTP GET)
+  → find parse^STDJSON signature + example
+
+Compose answer:
+  "Use `parse^STDJSON(jsonText, .tree)`. It populates `tree` with one
+  node per JSON value; strings get the prefix \"s:\". Worked
+  example from the manifest: …"
+```
+
+Key invariant: never guess the API surface. Every claim should be
+grounded in a `manifest_url` you actually fetched.
+
+### B.4 What you will and will not do
 
 **Will:**
 
-- Route from plain-English intent to typed IDs (single call).
+- Route plain-English intent to typed IDs (single `route_intent` call).
 - Fetch real signatures + worked examples from per-repo manifests.
-- Surface a repo's `verification_commands` so you can decide to run
-  them.
+- Surface a repo's `verification_commands` so the user can decide to
+  run them.
+- Cite the manifest URL you used in your answer.
 
 **Will not:**
 
-- Execute commands on its own. `verify` *lists* what a repo declared;
-  running them is your call.
-- Fabricate APIs. If a symbol isn't in the manifest, the agent
-  surfaces "I don't have a verified source for that" rather than
-  guessing.
-- Cache state on disk. The MCP server keeps a 60-second in-process
-  cache so a Claude-Code interaction amortizes fetches, but nothing
-  hits the filesystem.
+- Execute commands on your own. `verify` *lists* what a repo
+  declared; running them is the user's call.
+- Fabricate APIs. If a symbol isn't in the manifest, say so rather
+  than inventing one.
+- Cache catalog state on disk. The MCP server keeps a 60-second
+  in-process cache so a session amortizes fetches, but nothing hits
+  the filesystem.
 
 The `verify` "don't execute" choice is a security stance, not an
 oversight — see
 [phase4-plan.md §3 B5](phases/phase4-plan.md) for the rationale.
 
-## 7. Troubleshooting
+### B.5 If you don't have MCP support
 
-**`uvx` not found.** Install [`uv`](https://docs.astral.sh/uv/) first:
-`curl -LsSf https://astral.sh/uv/install.sh | sh`.
+Fetch the three raw catalog URLs and walk the 8-step handshake:
 
-**`claude --print "list your MCP tools"` returns nothing.** Check
-`.mcp.json` is in the repo root or your home `.config/claude/`
-directory. Restart Claude Code after editing.
+1. `GET …/profile/llms.txt`
+2. `GET …/profile/tools.json`, validate against `tools.schema.json`
+3. `GET …/profile/task_index.json`, find matching intent row
+4. Take the row's `primary` typed ID, look it up in
+   `tools.json` to get its `*_url`
+5. `GET` that manifest URL
+6. Read signature + example
+7. Compose the answer
+8. Cite the manifest URL
 
-**The MCP server crashes on launch.** Pinning to `@main` picks up
-breakage on first push. Pin to `@v0.1.0` (or the latest release tag —
-see <https://github.com/m-dev-tools/m-dev-tools-mcp/releases>) for
-stability.
+The MCP server does steps 1–6 for you and returns the manifest URL
+ready to cite. The raw-catalog path is functionally identical, just
+more round-trips.
 
-**The catalog returns a stale `verified_on` for a tool.** The weekly
-cron in `.github`'s CI catches that within 7 days. If you're not
-willing to wait, file an issue on the relevant repo asking the
-maintainer to re-run the verification commands + bump `verified_on`.
+---
 
-**Network unreachable on first call.** The MCP server has no offline
-mode for live operation. The CLI flag `--offline` exists on each
-gate but not on the server itself. Use the raw catalog (Path B) with
-a local checkout if you genuinely need offline.
-
-## 8. Where to learn more
+## 3. Where to learn more (shared)
 
 - [`AI-discoverability-architecture.md`](AI-discoverability-architecture.md)
   — the master architecture doc. First principles → three-layer
@@ -228,21 +340,8 @@ a local checkout if you genuinely need offline.
   output, so an agent can reproduce the framework's claims from
   history.
 - [`m-dev-tools-mcp`](https://github.com/m-dev-tools/m-dev-tools-mcp)
-  — the MCP server repo (the same repo `uvx` clones in Path A
-  above). The `AGENTS.md` there has the per-tool contracts in more
-  detail.
-
-## 9. Reporting issues
-
-The framework is CI-gated end-to-end, but bugs still happen. Report
-them at:
-
-- **MCP-server bugs** (a tool returns the wrong typed ID, the server
-  crashes on a query) →
-  <https://github.com/m-dev-tools/m-dev-tools-mcp/issues>
-- **Catalog bugs** (a `*_url` 404s, an intent routes wrong, a recipe
-  references a removed function) →
-  <https://github.com/m-dev-tools/.github/issues>
-- **Per-repo bugs** (e.g. m-stdlib STDJSON behavior differs from the
-  manifest) → file on the owning repo. The MCP `describe` response
-  includes the repo URL — go straight there.
+  — the MCP server repo (the same repo `uvx` clones above). The
+  `AGENTS.md` there has the per-tool contracts in more detail.
+- [Official MCP registry entry](https://registry.modelcontextprotocol.io/)
+  — search for `io.github.m-dev-tools/m-dev-tools-mcp`. The
+  registry-driven install path (Option 3 above) reads from here.
