@@ -291,6 +291,44 @@
         "primary": "doc:m-dev-tools#m-tooling-tier1",
         "doc": "https://github.com/m-dev-tools/.github/blob/main/docs/history/m-tooling-tier1.md"
       }
+    },
+
+    "recipes": {
+      "scaffold_new_app_tdd_ci": {
+        "intent": "Scaffold a new M project with TDD + CI in 60 seconds",
+        "primary": "recipe:new-app-tdd-ci",
+        "see_also": ["cmd:m-cli#new", "cmd:m-cli#test", "cmd:m-cli#fmt", "cmd:m-cli#lint", "cmd:m-cli#coverage", "cmd:m-cli#ci", "tool:m-test-engine", "module:m-stdlib#STDASSERT"]
+      },
+      "use_stdlib_module": {
+        "intent": "Look up an m-stdlib symbol (signature + example) and call it correctly",
+        "primary": "recipe:use-stdlib-module",
+        "see_also": ["cmd:m-cli#doc", "cmd:m-cli#search", "cmd:m-cli#examples", "module:m-stdlib#STDJSON"]
+      },
+      "add_stdlib_module": {
+        "intent": "Author a new STD* module in m-stdlib with TDD; regenerate the manifest",
+        "primary": "recipe:add-stdlib-module",
+        "see_also": ["tool:m-stdlib", "module:m-stdlib#STDASSERT", "cmd:m-cli#test"]
+      },
+      "add_lint_rule": {
+        "intent": "Ship a new M-MOD-* lint rule with fixer linkage and corpus validation",
+        "primary": "recipe:add-lint-rule",
+        "see_also": ["tool:m-cli", "cmd:m-cli#lint", "tool:m-modern-corpus", "tool:tree-sitter-m"]
+      },
+      "add_m_cli_command": {
+        "intent": "Register a new m-cli subcommand discoverable via m capabilities --json",
+        "primary": "recipe:add-m-cli-command",
+        "see_also": ["tool:m-cli", "cmd:m-cli#capabilities"]
+      },
+      "investigate_failure": {
+        "intent": "Standard triage path when `m test` is red",
+        "primary": "recipe:investigate-failure",
+        "see_also": ["cmd:m-cli#test", "cmd:m-cli#doctor", "tool:tree-sitter-m", "tool:m-test-engine"]
+      },
+      "add_editor_support": {
+        "intent": "Extend the VS Code extensions with a new file association or setting",
+        "primary": "recipe:add-editor-support",
+        "see_also": ["tool:tree-sitter-m-vscode", "tool:m-stdlib-vscode", "cmd:m-cli#lsp"]
+      }
     }
   }
 }
