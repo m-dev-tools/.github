@@ -117,7 +117,7 @@ For each repo, in order:
 | `tree-sitter-m-vscode` | exists | `package.json` already declares it; wrap | needs add | tier 3 |
 | `m-stdlib-vscode` | needs check | `package.json` + manifest discovery config | needs add | tier 3 |
 | `m-cli-extras` | unknown | dump plugin entry points to JSON | needs add | tier 3 |
-| `m-tools` | exists | **archived** — emit `status: archived` only | n/a | optional |
+| `m-tools` | archived (upstream) | **rehosted** under [`.github/docs/history/`](history/); dropped from `tools.json` | n/a | resolved |
 
 Until tier 1 emits machine-readable artifacts, the org catalog is fiction.
 
@@ -418,8 +418,11 @@ Goal: freshness, link-check, license-reconcile gates running weekly in CI.
    `CONTRIBUTING.md` is ~30 lines pointing at each repo's own contribution
    guide.
 4. **No history/archive routing in the catalog.** `m-tools` is archived;
-   either rehost its docs in `.github/docs/history/` or drop them from
-   `tools.json`. Agents care about the current shape.
+   its three design docs are rehosted under
+   [`.github/docs/history/`](history/) and routed via `task_index.json`'s
+   `history` category as `doc:m-dev-tools#<slug>` typed IDs. The
+   `tool:m-tools` entry is dropped from `tools.json` — agents care about
+   the current shape, not retired tools.
 5. **No human/AI documentation split per repo.** One `AGENTS.md` per repo;
    AI-specific sections marked inline. Two parallel docs always drift.
 

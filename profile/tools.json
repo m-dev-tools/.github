@@ -18,7 +18,7 @@
       "m-stdlib has architectural priority over m-cli — when both projects need a utility, it lands in m-stdlib first.",
       "Source-level tools (m fmt, m lint) are engine-neutral; runtime tools (m test, m coverage) are YottaDB-targeted.",
       "Every module ships with a vendored conformance corpus tied to the relevant RFC or NIST publication.",
-      "m-cli's CLI ergonomics deliberately mirror Go (`go fmt`/`test`/`vet`) and Rust (`cargo fmt`/`test`/`clippy`) — see m-tools/docs/m-tool-gap-analysis.md for the gap analysis that drove the design."
+      "m-cli's CLI ergonomics deliberately mirror Go (`go fmt`/`test`/`vet`) and Rust (`cargo fmt`/`test`/`clippy`) — see .github/docs/history/m-tool-gap-analysis.md for the gap analysis that drove the design."
     ]
   },
 
@@ -169,18 +169,6 @@
       "extension_info_url": "https://raw.githubusercontent.com/m-dev-tools/m-stdlib-vscode/main/dist/extension-info.json",
       "package_json_url":   "https://raw.githubusercontent.com/m-dev-tools/m-stdlib-vscode/main/package.json",
       "consumes": ["tool:m-stdlib"]
-    },
-
-    "m-tools": {
-      "id": "tool:m-tools",
-      "repo": "https://github.com/m-dev-tools/m-tools",
-      "role": "ARCHIVED — historical seed of the entire org. Original gap analysis + Tier 1–4 strategy + canonical command map.",
-      "language": "markdown",
-      "license": "AGPL-3.0",
-      "agent_instructions": "https://github.com/m-dev-tools/m-tools/blob/main/README.md",
-      "verified_on": "2026-05-10",
-      "status": "archived",
-      "notes": "Read for: why the ecosystem is shaped the way it is. See m-tools/docs/m-tool-gap-analysis.md for the Go/Rust/Python comparison that drove m-cli's CLI ergonomics. preserved_docs: docs/gap-analysis-and-remediation-strategy.md, docs/m-tool-gap-analysis.md, docs/m-tooling-tier1.md, docs/implementation.md."
     }
   },
 
