@@ -46,16 +46,30 @@ parse. The Phase 0 exit criterion is met.
    Captured in m-cli `f516e76` and in
    `~/claude/memory/feedback_manifest_drift_gotchas.md` for future
    manifest-drift work.
+6. **`docs/`-as-prose-only cross-repo cleanup.** Audit + relocate
+   non-prose artifacts out of every repo's `docs/`. Three PRs shipped
+   (after Phase 0 merges):
+   - m-standard PR #6 — `docs/integrated/` → `integrated/` (reverts
+     3bfb947). ADR-005 frames the layer as a machine-readable
+     interface, not a doc; the repo's own code defaults to root
+     `integrated/`; the layout drift was leaking as a shim into
+     consumer repos.
+   - m-cli PR #9 — `docs/vista-lint-presets/` → `examples/vista-lint-presets/`
+     (copy-paste TOML preset; worked-example artifact, not prose).
+   - m-stdlib PR #4 — update four inbound refs in
+     `templates/m-vista-test-suite/` and `docs/testing/` to the new
+     m-cli path.
+   Follow-on m-cli PR #10 dropped the now-dead `docs/`-walk shim in
+   `_find_m_standard()` (compatibility code from the docs/integrated
+   migration window). `make phase0-smoke` re-verified PASS after each
+   batch — `exposes.*` pointers move atomically with payload files.
+7. **Local feature branches cleared** by `gh pr merge --delete-branch`
+   running from the parent's `main` (deletes both remote and local
+   tracking branch when not currently checked out).
 
-## Outstanding follow-ups (Phase 0 cleanup, non-blocking)
+## No outstanding Phase 0 follow-ups
 
-1. **Local feature branches still exist** in each repo's local clone
-   even though origin deleted them. Optional cleanup:
-   ```bash
-   cd m-stdlib && git checkout main && git pull && git branch -D phase0-B-repo-meta
-   cd m-standard && git checkout main && git pull && git branch -D phase0-c-repo-meta
-   cd m-cli && git checkout main && git pull && git branch -D phase0-D
-   ```
+Phase 1 is unblocked.
 
 ## Next
 
