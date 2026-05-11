@@ -61,7 +61,7 @@ assert _spec and _spec.loader
 _spec.loader.exec_module(_validate_repo_meta)
 
 
-# ----- the canonical TIER_1 + TIER_2 + TIER_3 list (nine onboarded repos) ---
+# ----- the canonical TIER_1 + TIER_2 + TIER_3 list (ten onboarded repos) ---
 
 TIER_1 = [
     "https://raw.githubusercontent.com/m-dev-tools/m-cli/main/dist/repo.meta.json",
@@ -79,6 +79,7 @@ TIER_3 = [
     "https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m-vscode/main/dist/repo.meta.json",
     "https://raw.githubusercontent.com/m-dev-tools/m-stdlib-vscode/main/dist/repo.meta.json",
     "https://raw.githubusercontent.com/m-dev-tools/m-cli-extras/main/dist/repo.meta.json",
+    "https://raw.githubusercontent.com/m-dev-tools/m-dev-tools-mcp/main/dist/repo.meta.json",
 ]
 
 # Top-level keys we copy from the prior tools.json verbatim. These hold

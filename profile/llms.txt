@@ -18,6 +18,10 @@
 - [m-standard](https://github.com/m-dev-tools/m-standard/blob/main/AGENTS.md): language reference data (grammar, tokens)
 - [tree-sitter-m](https://github.com/m-dev-tools/tree-sitter-m/blob/main/AGENTS.md): parser / AST
 
+## Agent integration
+
+- [m-dev-tools-mcp](https://github.com/m-dev-tools/m-dev-tools-mcp/blob/main/AGENTS.md): MCP server wrapping this catalog — `route_intent` / `describe` / `verify`
+
 ## Guardrails
 
 - Do not invent STD* APIs or `m` subcommands; route the gap to the owning repo.

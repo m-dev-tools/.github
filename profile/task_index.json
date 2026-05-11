@@ -272,6 +272,12 @@
         "intent": "Validate against VistA's 39,330-routine corpus",
         "primary": "tool:tree-sitter-m",
         "see_also": ["cmd:m-cli#lint"]
+      },
+      "agent_integration": {
+        "intent": "Point my MCP-capable agent at the m-dev-tools catalog",
+        "primary": "tool:m-dev-tools-mcp",
+        "see_also": ["cmd:m-cli#doctor", "doc:m-dev-tools#ai-discoverability-plan"],
+        "doc": "https://github.com/m-dev-tools/m-dev-tools-mcp/blob/main/examples/claude-code/README.md"
       }
     },
 
