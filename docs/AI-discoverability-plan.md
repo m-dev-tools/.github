@@ -295,8 +295,33 @@ protocol. Three tools:
 - `describe(typed_id: str) → JSON blob with pointers`
 - `verify(repo: str) → runs that repo's verification_commands; returns status`
 
-One Python file (~150 LOC), published as `m-dev-tools-mcp` on PyPI. Turns the
-catalog into a first-class protocol surface instead of "go read these files."
+One Python file (~150 LOC). Turns the catalog into a first-class protocol
+surface instead of "go read these files."
+
+**Distribution:** GitHub-first, not PyPI. Ships as a pre-built wheel attached
+to a GitHub Release — same pattern `tree-sitter-m` uses for its Python
+binding (see CONTRIBUTING.md § "Parser repo"). PyPI publishing is **deferred
+until external usage validates the API + name** — a published PyPI name +
+version is permanent (yank-only, not delete), and Phase 4 is the first time
+the `route_intent` / `describe` / `verify` surface gets real-agent use. The
+cost of a regretted PyPI publish is much higher than the cost of waiting.
+
+Users install via either form:
+
+```bash
+# Pre-built wheel from a tagged GitHub Release (fast, no Python build):
+pip install https://github.com/m-dev-tools/m-dev-tools-mcp/releases/download/v<X.Y>/m_dev_tools_mcp-<X.Y>-py3-none-any.whl
+
+# Or uvx, source-build pinned to a tag or commit:
+uvx --from git+https://github.com/m-dev-tools/m-dev-tools-mcp@v<X.Y> m-dev-tools-mcp
+```
+
+The MCP-client config (Claude Desktop / Codex / Continue / etc.) points at
+the `m-dev-tools-mcp` binary that either install path provides.
+
+PyPI publishing is in scope as a **follow-up after Phase 5** if external
+adoption demonstrates the name + API surface are worth the irreversible
+commitment. Until then, the GitHub-Release wheel is the canonical artifact.
 
 ---
 
@@ -393,11 +418,14 @@ new-app-TDD-CI recipe top-to-bottom against a fresh clone, with green CI.
 
 ### Phase 4 — Tier-3 repos + MCP server
 
-Goal: VS Code extensions and `m-cli-extras` ship `repo.meta.json`. Publish
-`m-dev-tools-mcp` to PyPI.
+Goal: VS Code extensions and `m-cli-extras` ship `repo.meta.json`. Ship
+`m-dev-tools-mcp` as a GitHub-Release wheel (not PyPI — see §5.3 for the
+deferral rationale).
 
-**Exit:** Claude/Codex/Continue can be pointed at the MCP server and answer
-`route_intent("parse JSON in M")` with `module:m-stdlib#STDJSON`.
+**Exit:** Claude/Codex/Continue can be pointed at the MCP server (installed
+via `pip install https://github.com/m-dev-tools/m-dev-tools-mcp/releases/download/v<X.Y>/...whl`
+or `uvx --from git+...@v<X.Y>`) and answer `route_intent("parse JSON in M")`
+with `module:m-stdlib#STDJSON`.
 
 ### Phase 5 — Continuous enforcement hardening
 
@@ -456,7 +484,7 @@ that requires careful agent prompting — encoded in `AGENTS.md` and
 | Each repo | `AGENTS.md`, `dist/repo.meta.json`, `dist/<kind>.json`, `make check-manifest` | yes (small, repo-local) |
 | Meta-repo | `llms.txt`, `README.md`, `task_index.json`, schemas, build scripts, CI, recipes | yes (routing only) |
 | Meta-repo (generated) | `tools.json` | **no** |
-| External | `m-dev-tools-mcp` PyPI package | yes |
+| External | `m-dev-tools-mcp` (GitHub-Release wheel; PyPI deferred — see §5.3) | yes |
 
 That is the entire surface area. Everything else lives in the repo that owns
 the facts.
