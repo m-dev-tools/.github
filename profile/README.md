@@ -23,28 +23,7 @@ maintaining modern (non-VistA) M code.
 
 ## For AI agents and automated tooling
 
-**m-dev-tools is fully AI-enabled with an MCP endpoint.** The fastest path is to point any MCP-capable agent (Claude Code, Codex, Continue, …) at [`m-dev-tools-mcp`](https://github.com/m-dev-tools/m-dev-tools-mcp); drop this into your project's `.mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "m-dev-tools": {
-      "command": "uvx",
-      "args": ["--from", "git+https://github.com/m-dev-tools/m-dev-tools-mcp@v0.1.0", "m-dev-tools-mcp"]
-    }
-  }
-}
-```
-
-The server exposes three tools — `route_intent("parse JSON in M") → ["module:m-stdlib#STDJSON"]`, `describe(typed_id) → pointer-blob`, `verify(repo) → verification_commands` (lists, doesn't execute) — that walk the catalog for you and ground every claim in a manifest URL the agent actually fetched. No fabricated APIs.
-
-**Full walkthrough:** [`docs/ai-discoverability/ai-users-guide.md`](../docs/ai-discoverability/ai-users-guide.md) — install paths, example sessions, troubleshooting, where to file bugs.
-
-**Direct catalog access** (no MCP) is still supported — start at [`tools.json`](tools.json) (machine-readable catalog of every repo + every `*_url` pointer + `consumed_by` graph) and [`task_index.json`](task_index.json) (hand-curated intent → typed-ID routing). The 8-step discovery handshake in [`AI-discoverability-architecture.md`](../docs/ai-discoverability/AI-discoverability-architecture.md) spells out the canonical sequence. Four continuous-enforcement gates (freshness / link-check / license-reconcile / schema-version) keep the catalog honest — every PR + a weekly cron firing. See [`docs/ai-discoverability/`](../docs/ai-discoverability/) for the full framework.
-
-Manifest pointers for symbol-level lookups:
-- **m-stdlib API** → [`dist/stdlib-manifest.json`](https://raw.githubusercontent.com/m-dev-tools/m-stdlib/main/dist/stdlib-manifest.json)
-- **M language surface** → [`integrated/grammar-surface.json`](https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/grammar-surface.json)
+m-dev-tools ships an MCP server ([`m-dev-tools-mcp`](https://pypi.org/project/m-dev-tools-mcp/), also listed on the [official MCP registry](https://registry.modelcontextprotocol.io/) as `io.github.m-dev-tools/m-dev-tools-mcp`) that exposes `route_intent` / `describe` / `verify` over the catalog so any MCP-capable agent (Claude Code, Codex, Continue, …) can resolve plain-English M-tooling intent without guessing. See the [**AI users guide**](../docs/ai-discoverability/ai-users-guide.md) for install paths (PyPI, `.mcp.json`, registry-driven), example sessions, and the no-MCP fallback that walks `tools.json` directly.
 
 ## Repositories
 
