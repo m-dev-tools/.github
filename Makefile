@@ -1,8 +1,32 @@
-.PHONY: validate-catalog check-repo-meta phase0-smoke check-docs-prose
+.PHONY: catalog validate-catalog check-catalog check-repo-meta phase0-smoke check-docs-prose
 
+# Phase-1 Track B's generator. Fetches each TIER_1+TIER_2+TIER_3 repo's
+# dist/repo.meta.json, validates it, translates it into a `tools.<key>`
+# summary entry with *_url pointer fields, carries archived entries
+# from the prior tools.json, computes consumed_by inverse-edges, and
+# writes back to profile/tools.json. Deterministic — running twice
+# produces byte-identical output. The drift gate (check-catalog,
+# below) regenerates and asserts no diff against the committed file.
+catalog:
+	python3 profile/build/build-catalog.py --write profile/tools.json
+
+# Phase-1 Track B's validator. Schema-strict (Draft 2020-12) against
+# profile/tools.schema.json + profile/task_index.schema.json, plus a
+# key-collision guard between the two files' top-level shapes. Replaces
+# the prior parse-only target which only ran `python -m json.tool`.
 validate-catalog:
-	python3 -m json.tool profile/tools.json >/tmp/m-dev-tools-tools-json-check
-	python3 -m json.tool profile/tools.schema.json >/tmp/m-dev-tools-tools-schema-check
+	python3 profile/build/validate-catalog.py
+
+# Phase-1 Track D's drift gate. Mirrors each tier-1 repo's
+# `make check-manifest`: regenerate the catalog from live manifest
+# state, then `git diff --exit-code` against the committed file.
+# Used by CI on every push/PR.
+check-catalog:
+	$(MAKE) catalog
+	@git diff --exit-code profile/tools.json profile/task_index.json \
+	    || { echo "ERROR: catalog drift — run 'make catalog' and commit." >&2; exit 1; }
+	$(MAKE) validate-catalog
+	@echo "check-catalog: clean"
 
 # Phase-0 Track A: validate a repo.meta.json file or URL against the org-level
 # repo.meta.schema.json contract. Used by tier-1 repos' make check-manifest

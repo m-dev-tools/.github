@@ -12,16 +12,43 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate catalog JSON
-        # tools.json + tools.schema.json must remain valid JSON. The
-        # full Phase-1 catalog-build pipeline (build-catalog.py +
-        # validate-catalog.py) lands later; for now we gate on
-        # parseability.
-        run: make validate-catalog
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Phase-1 catalog dependencies
+        # build-catalog.py + validate-catalog.py need jsonschema.
+        # Pinned-ish — Draft 2020-12 has been stable for years and the
+        # validator API is small. Bump as needed; not part of the
+        # schema-compat contract.
+        run: pip install --upgrade pip 'jsonschema>=4.18'
+
+      - name: Run Phase-1 catalog unit tests
+        # TDD safety net for build-catalog.py + validate-catalog.py.
+        # Fails fast if a script edit broke a test.
+        run: pip install pytest && pytest profile/build/ -q
 
       - name: docs/ prose-only gate
         # Cross-repo guardrail: docs/ holds only human-readable prose.
-        # Non-prose artifacts (data, output, metadata, examples) belong
-        # under a top-level domain-specific directory. Engine-free
-        # find-based check; same target lands in every tier-1 repo.
+        # Engine-free find-based check; same target lands in every
+        # tier-1 + tier-2 + tier-3 repo.
         run: make check-docs-prose
+
+      - name: Validate catalog (schema-strict)
+        # Real jsonschema validation against tools.schema.json +
+        # task_index.schema.json. Replaces the prior parse-only gate.
+        run: make validate-catalog
+
+      - name: Catalog drift gate
+        # Regenerate the catalog from live tier-1+2+3 manifest state,
+        # then `git diff --exit-code` — same drift-gate pattern every
+        # tier-N repo uses. If a contributor edits tools.json by hand
+        # or a manifest in another repo changes without `make catalog`
+        # being run here, this step fails.
+        #
+        # Network-dependent (fetches raw.githubusercontent.com); CI
+        # runners always have egress. For local maintainer use the
+        # same target works.
+        run: |
+          make catalog
+          git diff --exit-code profile/tools.json profile/task_index.json
