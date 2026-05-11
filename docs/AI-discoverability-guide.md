@@ -309,7 +309,7 @@ tool:m-cli
 cmd:m-cli#test
 cmd:m-cli#ci.init
 module:m-stdlib#STDJSON
-doc:m-tools#gap-analysis
+doc:m-dev-tools#m-tool-gap-analysis
 data:m-standard#grammar-surface
 workflow:tdd_inner_loop
 task:workflow.scaffold_new_project
