@@ -41,6 +41,7 @@ both committed at landing time.
 | 2 — Tier-2 + tier-3 onboarding | (folded into Phase 1) | — | Closed 2026-05-10 |
 | 3 — Recipes + discovery handshake | [`phases/phase3-plan.md`](phases/phase3-plan.md) | [`phases/phase3-evidence.md`](phases/phase3-evidence.md) | Closed 2026-05-11 |
 | 4 — MCP server (`m-dev-tools-mcp`) | [`phases/phase4-plan.md`](phases/phase4-plan.md) | [`phases/phase4-evidence.md`](phases/phase4-evidence.md) | Closed 2026-05-11 |
+| 5 — Continuous enforcement hardening | [`phases/phase5-plan.md`](phases/phase5-plan.md) | — (in flight) | Plan landed 2026-05-11 |
 
 Phase 0 used a different naming convention (`-status.md` instead of
 `-evidence.md`). The convention stabilized starting Phase 1 — both
