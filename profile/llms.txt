@@ -1,49 +1,27 @@
 # m-dev-tools
 
-Engine-neutral M (MUMPS) developer tools for TDD, CI/CD, formatting, linting,
-testing, coverage, language-server support, and runtime library work across
-YottaDB and InterSystems IRIS.
+> Engine-neutral M (MUMPS) developer tools — TDD/CI/lint/fmt/test/coverage
+> across YottaDB and InterSystems IRIS. Modeled on Go/Rust/Python toolchains.
 
 ## Start here
 
-- Human overview: https://github.com/m-dev-tools/.github/blob/main/profile/README.md
-- Machine-readable org catalog: https://github.com/m-dev-tools/.github/blob/main/profile/tools.json
-- Catalog schema: https://github.com/m-dev-tools/.github/blob/main/profile/tools.schema.json
-
-## Primary workflow
-
-For a new M application, use `m-cli` first:
-
-1. Read `tools.json`.
-2. Match the user request against `task_index`.
-3. Follow the matched `primary` tool or module.
-4. For new application work, use `workflow.tdd_inner_loop`.
-5. Read the target repo README and `CLAUDE.md` before editing.
-6. Verify with the nearest available commands: `m doctor`, `m test`,
-   `m fmt --check`, `m lint`, and `m coverage`.
+- [Org catalog (machine-readable)](https://raw.githubusercontent.com/m-dev-tools/.github/main/profile/tools.json): per-repo summary + pointer URLs
+- [Task index (hand-curated routing)](https://raw.githubusercontent.com/m-dev-tools/.github/main/profile/task_index.json): intent → typed ID
+- [Schema — tools](https://raw.githubusercontent.com/m-dev-tools/.github/main/profile/tools.schema.json): contract for `tools.json`
+- [Schema — task index](https://raw.githubusercontent.com/m-dev-tools/.github/main/profile/task_index.schema.json): contract for `task_index.json`
+- [Org README](https://github.com/m-dev-tools/.github/blob/main/profile/README.md): human overview
 
 ## Core repositories
 
-- m-cli: https://github.com/m-dev-tools/m-cli
-- m-cli Claude context: https://github.com/m-dev-tools/m-cli/blob/main/CLAUDE.md
-- m-cli guide: https://github.com/m-dev-tools/m-cli/blob/main/docs/guide.md
-- m-stdlib: https://github.com/m-dev-tools/m-stdlib
-- m-stdlib manifest: https://raw.githubusercontent.com/m-dev-tools/m-stdlib/main/dist/stdlib-manifest.json
-- m-standard: https://github.com/m-dev-tools/m-standard
-- M grammar surface: https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/grammar-surface.json
-- tree-sitter-m: https://github.com/m-dev-tools/tree-sitter-m
-- m-test-engine: https://github.com/m-dev-tools/m-test-engine
-
-## Historical context
-
-- Gap analysis and remediation strategy: https://github.com/m-dev-tools/m-tools/blob/main/docs/gap-analysis-and-remediation-strategy.md
-- Go/Rust/Python toolchain comparison: https://github.com/m-dev-tools/m-tools/blob/main/docs/m-tool-gap-analysis.md
+- [m-cli](https://github.com/m-dev-tools/m-cli/blob/main/AGENTS.md): canonical `m` CLI surface
+- [m-stdlib](https://github.com/m-dev-tools/m-stdlib/blob/main/AGENTS.md): runtime standard library (STD* modules)
+- [m-standard](https://github.com/m-dev-tools/m-standard/blob/main/AGENTS.md): language reference data (grammar, tokens)
+- [tree-sitter-m](https://github.com/m-dev-tools/tree-sitter-m/blob/main/AGENTS.md): parser / AST
 
 ## Guardrails
 
-- Use `m-stdlib` for runtime primitives before adding duplicate helper logic
-  to `m-cli` or an application.
-- Use `m-standard` for language semantics; do not infer M tokens from memory.
-- Use `tree-sitter-m` for parser or AST behavior.
-- Do not invent STD* APIs or `m` subcommands. If absent from `tools.json` or a
-  manifest, identify the gap and route it to the owning repo.
+- Do not invent STD* APIs or `m` subcommands; route the gap to the owning repo.
+- Use `m-stdlib` before adding helper logic to `m-cli` or an application.
+- For language semantics, query `m-standard`'s TSVs/JSON, not memory.
+</content>
+</invoke>
