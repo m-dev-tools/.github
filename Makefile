@@ -1,4 +1,4 @@
-.PHONY: catalog validate-catalog check-catalog check-repo-meta phase0-smoke check-docs-prose recipes-check handshake check-freshness check-links check-licenses
+.PHONY: catalog validate-catalog check-catalog check-repo-meta phase0-smoke check-docs-prose recipes-check handshake check-freshness check-links check-licenses check-schema-compat
 
 # Phase-1 Track B's generator. Fetches each TIER_1+TIER_2+TIER_3 repo's
 # dist/repo.meta.json, validates it, translates it into a `tools.<key>`
@@ -124,3 +124,12 @@ check-links:
 # substring signature (≥ 2 markers per license).
 check-licenses:
 	python3 profile/build/check-licenses.py --offline
+
+# Phase-5 Track D: schema-version policing gate. Per-PR only — diffs
+# tools.schema.json + task_index.schema.json between the PR base and
+# HEAD; fails if schema_compat bumped without a matching
+# schema-changelog.md edit, or if a non-additive change (removed
+# required field, removed enum value, additionalProperties tightened
+# true→false) landed without a schema_compat bump.
+check-schema-compat:
+	python3 profile/build/check-schema-compat.py

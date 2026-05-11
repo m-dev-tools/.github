@@ -18,6 +18,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Phase-5 Track D needs origin/main reachable so
+          # check-schema-compat can diff against the PR base. Default
+          # checkout fetches only HEAD; full history is cheap on this
+          # repo (mostly markdown + small Python).
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -91,6 +97,15 @@ jobs:
         # (handshake job below) does the full LICENSE-body match.
         if: github.event_name != 'schedule'
         run: make check-licenses
+
+      - name: Schema-version policing (Phase-5 Track D — per-PR only)
+        # Per phase5-plan.md §5 D3: this gate fires per-PR only — a
+        # weekly cron firing wouldn't add signal because schema_compat
+        # bumps land via PRs by definition. Diffs against origin/main
+        # so the gate has a stable base ref regardless of which branch
+        # opened the PR.
+        if: github.event_name != 'schedule'
+        run: make check-schema-compat
 
   handshake:
     # Phase-3 Track D — discovery-protocol handshake. Runs the 8-step
