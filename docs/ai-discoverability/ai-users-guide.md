@@ -75,6 +75,40 @@ part is about the wiring.
 
 Pick the option that matches the AI extension you're using.
 
+#### Option 0 — PyPI (works for any MCP client that points at a binary on `$PATH`)
+
+```bash
+pip install m-dev-tools-mcp
+# or with uv:
+uv pip install m-dev-tools-mcp
+```
+
+Then point your client's MCP config at the `m-dev-tools-mcp`
+executable. For Claude Code's `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "m-dev-tools": { "command": "m-dev-tools-mcp" }
+  }
+}
+```
+
+For Copilot Chat's `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "m-dev-tools": { "type": "stdio", "command": "m-dev-tools-mcp" }
+  }
+}
+```
+
+This is the recommended path once `m-dev-tools-mcp` is on PyPI
+(target: Phase 6 ship). Options 1–3 below all still work and are
+the fallbacks when you'd rather not `pip install` into your
+environment.
+
 #### Option 1 — GitHub Copilot Chat (VS Code, agent mode)
 
 Create `.vscode/mcp.json` at your workspace root:

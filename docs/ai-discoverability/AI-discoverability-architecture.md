@@ -89,11 +89,12 @@ transport. For us to be MCP-native, we need:
   ID malformed, tool not found, …), the failure carries a stable
   string code the agent can switch on. No free-form exception text.
 - **A frictionless install path** that doesn't require the agent's
-  operator to babysit. We use `uvx --from git+…@<tag>` (pin to a
-  release tag, install on demand) and `pip install <release-wheel-url>`
-  as the two supported paths. No PyPI registration — see
-  [`AI-discoverability-plan.md` §5.3](AI-discoverability-plan.md#53-mcp-server-m-dev-tools-mcp)
-  for the rationale.
+  operator to babysit. We support `pip install m-dev-tools-mcp`
+  (PyPI), `pip install <release-wheel-url>` (GitHub Release wheel),
+  and `uvx --from git+…@<tag>` (pin to a release tag, install on
+  demand) — three channels with overlapping reach. PyPI is the
+  channel of choice for the official MCP registry listing (per
+  [`AI-discoverability-plan.md` §5.3 + Phase 6](AI-discoverability-plan.md#53-mcp-server-m-dev-tools-mcp)).
 - **Pointer-blob responses.** The MCP tools never inline catalog
   payloads. `describe("module:m-stdlib#STDJSON")` returns a dict of
   URLs to fetch next — same "pointers, not facts" invariant as the
@@ -387,15 +388,22 @@ repo root, the generator resolves it against the raw-content prefix.
 ### 4.6 Ship the MCP server through a new distribution channel
 
 The MCP server (`m-dev-tools-mcp`) is currently distributed through
-three channels: a `uvx --from git+...@<tag>` install, a GitHub
-Release wheel, and the public **MCP registry** at
-[`registry.modelcontextprotocol.io`](https://registry.modelcontextprotocol.io/)
-under the namespace `io.github.m-dev-tools/m-dev-tools-mcp`.
-Registry-aware clients (Codex, Continue, Goose, …) discover the
-server without a hand-written `.mcp.json`.
+four channels:
 
-To add a new channel (PyPI, a VS Code extension bundling the
-server, a Homebrew tap, …):
+1. **PyPI** — `pip install m-dev-tools-mcp`. Primary channel; what
+   the MCP registry's `server.json` declares.
+2. **GitHub Release wheel** — `pip install <release-url>`. Backup
+   for environments that can't reach PyPI.
+3. **`uvx --from git+...@<tag>`** — source-build pinned to a tag or
+   commit. Useful for pre-release testing.
+4. **Public MCP registry** at
+   [`registry.modelcontextprotocol.io`](https://registry.modelcontextprotocol.io/)
+   under the namespace `io.github.m-dev-tools/m-dev-tools-mcp`.
+   Registry-aware clients (Codex, Continue, Goose, …) discover the
+   server without a hand-written `.mcp.json`.
+
+To add a new channel (a VS Code extension bundling the server, a
+Homebrew tap, …):
 
 1. Decide whether the channel is worth the recurring maintenance.
    The MCP registry is one PR per release tag via the
