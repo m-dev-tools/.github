@@ -112,7 +112,7 @@ filtered to what's *actually* not done as of 2026-05-10.
 
 | ID | Description |
 |---|---|
-| **P4-mcp** | `m-dev-tools-mcp` PyPI package — wraps `tools.json` + `task_index.json` + discovery protocol with `route_intent`/`describe`/`verify` |
+| **P4-mcp** | `m-dev-tools-mcp` GitHub-Release wheel (PyPI deferred — see `AI-discoverability-plan.md` §5.3) — wraps `tools.json` + `task_index.json` + discovery protocol with `route_intent`/`describe`/`verify` |
 
 ### 3.5 In `.github` (continuous enforcement — Phase 5)
 
