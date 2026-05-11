@@ -1,4 +1,4 @@
-.PHONY: catalog validate-catalog check-catalog check-repo-meta phase0-smoke check-docs-prose recipes-check handshake check-freshness check-links
+.PHONY: catalog validate-catalog check-catalog check-repo-meta phase0-smoke check-docs-prose recipes-check handshake check-freshness check-links check-licenses
 
 # Phase-1 Track B's generator. Fetches each TIER_1+TIER_2+TIER_3 repo's
 # dist/repo.meta.json, validates it, translates it into a `tools.<key>`
@@ -115,3 +115,12 @@ check-freshness:
 # full HEAD walk so broken upstream URLs surface within 7 days.
 check-links:
 	python3 profile/build/check-links.py --offline
+
+# Phase-5 Track C: license-reconcile gate over each tools.<key>
+# entry's declared `license` field. Per-PR runs --offline (validates
+# the declared string is in our signature dict; no LICENSE-file
+# fetch). The weekly cron firing fetches each repo's LICENSE and
+# verifies the body matches the declared license via a per-license
+# substring signature (≥ 2 markers per license).
+check-licenses:
+	python3 profile/build/check-licenses.py --offline

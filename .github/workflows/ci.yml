@@ -84,6 +84,14 @@ jobs:
         if: github.event_name != 'schedule'
         run: make check-links
 
+      - name: License inventory (Phase-5 Track C — PR-mode)
+        # Per phase5-plan.md §4 C3: PR-mode runs --offline (sanity-
+        # checks the declared `license` field is in our signature
+        # dict; doesn't fetch LICENSE files). The weekly cron firing
+        # (handshake job below) does the full LICENSE-body match.
+        if: github.event_name != 'schedule'
+        run: make check-licenses
+
   handshake:
     # Phase-3 Track D — discovery-protocol handshake. Runs the 8-step
     # external-agent walk-through end-to-end. On push/PR uses bundled
@@ -123,3 +131,12 @@ jobs:
         # opens in between. Per-PR jobs use --offline (see above).
         if: github.event_name == 'schedule'
         run: python3 profile/build/check-links.py
+
+      - name: License-reconcile (Phase-5 Track C — cron full fetch)
+        # Phase-5 Track C weekly fetch: pull each tools.<key>'s
+        # LICENSE file from raw.githubusercontent.com and match it
+        # against the declared `license` field's signature. A
+        # declared-vs-body MISMATCH or a 404'd LICENSE file surfaces
+        # within 7 days. Per-PR jobs use --offline (see above).
+        if: github.event_name == 'schedule'
+        run: python3 profile/build/check-licenses.py
