@@ -49,8 +49,9 @@
       "agent_instructions": "https://github.com/m-dev-tools/m-cli-extras/blob/main/AGENTS.md",
       "verified_on": "2026-05-10",
       "status": "active",
-      "consumes": ["tool:m-cli"],
-      "notes": "Not yet onboarded to the Phase-0 contract — dist/repo.meta.json not present as of 2026-05-10. Track in current-state-inventory-priority.md §3.2."
+      "repo_meta_url": "https://raw.githubusercontent.com/m-dev-tools/m-cli-extras/main/dist/repo.meta.json",
+      "plugins_url":   "https://raw.githubusercontent.com/m-dev-tools/m-cli-extras/main/dist/plugins.json",
+      "consumes": ["tool:m-cli"]
     },
 
     "m-stdlib": {
@@ -144,12 +145,15 @@
       "repo": "https://github.com/m-dev-tools/tree-sitter-m-vscode",
       "role": "VS Code extension — syntax highlighting via tree-sitter-m WASM + LSP client (spawns `m lsp` from m-cli)",
       "language": "typescript",
-      "license": "AGPL-3.0",
-      "agent_instructions": "https://github.com/m-dev-tools/tree-sitter-m-vscode/blob/main/CLAUDE.md",
+      "license": "MIT",
+      "agent_instructions": "https://github.com/m-dev-tools/tree-sitter-m-vscode/blob/main/AGENTS.md",
       "verified_on": "2026-05-10",
       "status": "active",
-      "consumes": ["tool:tree-sitter-m", "tool:m-cli"],
-      "notes": "Not yet onboarded to the Phase-0 contract — dist/repo.meta.json not present as of 2026-05-10. CLAUDE.md present but not yet renamed to AGENTS.md. Track in current-state-inventory-priority.md §3.2."
+      "repo_meta_url":             "https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m-vscode/main/dist/repo.meta.json",
+      "extension_info_url":        "https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m-vscode/main/dist/extension-info.json",
+      "package_json_url":          "https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m-vscode/main/package.json",
+      "language_configuration_url":"https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m-vscode/main/language-configuration.json",
+      "consumes": ["tool:tree-sitter-m", "tool:m-cli"]
     },
 
     "m-stdlib-vscode": {
@@ -158,11 +162,13 @@
       "role": "VS Code extension — manifest-driven hover / goto-def / completion for STD* symbols in .m files",
       "language": "typescript",
       "license": "MIT",
-      "agent_instructions": "https://github.com/m-dev-tools/m-stdlib-vscode/blob/main/README.md",
+      "agent_instructions": "https://github.com/m-dev-tools/m-stdlib-vscode/blob/main/AGENTS.md",
       "verified_on": "2026-05-10",
       "status": "active",
-      "consumes": ["tool:m-stdlib"],
-      "notes": "Not yet onboarded to the Phase-0 contract — no AGENTS.md, no dist/repo.meta.json as of 2026-05-10. agent_instructions points at README.md as a placeholder. Track in current-state-inventory-priority.md §3.2."
+      "repo_meta_url":      "https://raw.githubusercontent.com/m-dev-tools/m-stdlib-vscode/main/dist/repo.meta.json",
+      "extension_info_url": "https://raw.githubusercontent.com/m-dev-tools/m-stdlib-vscode/main/dist/extension-info.json",
+      "package_json_url":   "https://raw.githubusercontent.com/m-dev-tools/m-stdlib-vscode/main/package.json",
+      "consumes": ["tool:m-stdlib"]
     },
 
     "m-tools": {
