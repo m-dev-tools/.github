@@ -42,6 +42,7 @@
       "commands_url": "https://raw.githubusercontent.com/m-dev-tools/m-cli/main/dist/commands.json",
       "consumed_by": [
         "tool:m-cli-extras",
+        "tool:m-dev-tools-mcp",
         "tool:tree-sitter-m-vscode"
       ],
       "consumes": [
@@ -76,6 +77,24 @@
       "status": "active",
       "verified_on": "2026-05-10"
     },
+    "m-dev-tools-mcp": {
+      "agent_instructions": "https://github.com/m-dev-tools/m-dev-tools-mcp/blob/main/AGENTS.md",
+      "consumes": [
+        "tool:m-cli",
+        "tool:m-stdlib",
+        "tool:m-standard"
+      ],
+      "id": "tool:m-dev-tools-mcp",
+      "language": "python",
+      "license": "AGPL-3.0",
+      "mcp_tools_url": "https://raw.githubusercontent.com/m-dev-tools/m-dev-tools-mcp/main/dist/mcp-tools.json",
+      "release_wheel_url": "https://github.com/m-dev-tools/m-dev-tools-mcp/releases/download/v0.1.0/m_dev_tools_mcp-0.1.0-py3-none-any.whl",
+      "repo": "https://github.com/m-dev-tools/m-dev-tools-mcp",
+      "repo_meta_url": "https://raw.githubusercontent.com/m-dev-tools/m-dev-tools-mcp/main/dist/repo.meta.json",
+      "role": "MCP server wrapping the m-dev-tools org catalog as route_intent / describe / verify tools",
+      "status": "active",
+      "verified_on": "2026-05-11"
+    },
     "m-modern-corpus": {
       "agent_instructions": "https://github.com/m-dev-tools/m-modern-corpus/blob/main/AGENTS.md",
       "id": "tool:m-modern-corpus",
@@ -95,6 +114,7 @@
       "commands_url": "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/commands.tsv",
       "consumed_by": [
         "tool:m-cli",
+        "tool:m-dev-tools-mcp",
         "tool:tree-sitter-m"
       ],
       "errors_url": "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/errors.tsv",
@@ -117,6 +137,7 @@
     "m-stdlib": {
       "agent_instructions": "https://github.com/m-dev-tools/m-stdlib/blob/main/AGENTS.md",
       "consumed_by": [
+        "tool:m-dev-tools-mcp",
         "tool:m-stdlib-vscode"
       ],
       "consumes": [
