@@ -28,6 +28,12 @@ Exit codes (the CI gate in Track D branches on these):
 CLI::
 
     run-recipe.py path/to/recipe.md
+    run-recipe.py --validate-only path/to/recipe.md
+
+``--validate-only`` skips the ``mktemp -d`` + ``bash`` execution stage
+and only validates the recipe's frontmatter, presence of a Steps bash
+block, and a non-empty ``## Expected output`` section. CI uses this mode
+to gate recipe shape without needing the M toolchain installed.
 """
 
 from __future__ import annotations
@@ -233,7 +239,7 @@ def extract_expected_substrings(body: str) -> list[str]:
 # ---- driver ----------------------------------------------------------------
 
 
-def run_recipe(recipe_path: Path) -> int:
+def run_recipe(recipe_path: Path, validate_only: bool = False) -> int:
     # 1. Read file.
     try:
         text = recipe_path.read_text(encoding="utf-8")
@@ -271,6 +277,25 @@ def run_recipe(recipe_path: Path) -> int:
             file=sys.stderr,
         )
         return EXIT_FRONTMATTER_INVALID
+
+    # 4b. --validate-only short-circuit: verify the recipe parses + has a
+    # Steps block + has Expected-output assertions, but do NOT execute the
+    # command sequence. Used by CI when the runner environment lacks the
+    # toolchain a ci_verifiable recipe needs (m-cli, m-test-engine, …).
+    # Full executable verification is a maintainer's responsibility when
+    # bumping `verified_on`, plus a future scheduled CI job that
+    # bootstraps the toolchain.
+    if validate_only:
+        expected = extract_expected_substrings(body)
+        if not expected:
+            print(
+                f"ERROR: {recipe_path}: ci_verifiable: true recipe must declare "
+                f"at least one 'must contain: …' assertion under '## Expected output'",
+                file=sys.stderr,
+            )
+            return EXIT_FRONTMATTER_INVALID
+        print(f"VALIDATE: {recipe_path} (frontmatter + steps + {len(expected)} assertions OK)")
+        return EXIT_OK
 
     # 5–6. mktemp -d, run.
     tmpdir = Path(tempfile.mkdtemp(prefix="recipe-"))
@@ -331,8 +356,18 @@ def run_recipe(recipe_path: Path) -> int:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0] if __doc__ else "")
     parser.add_argument("recipe", type=Path, help="Path to the recipe Markdown file.")
+    parser.add_argument(
+        "--validate-only",
+        action="store_true",
+        help=(
+            "Validate frontmatter, Steps block presence, and "
+            "Expected-output assertions without executing the recipe. "
+            "Used by CI environments that lack the runtime toolchain "
+            "(m-cli, m-test-engine, …) the recipe needs."
+        ),
+    )
     args = parser.parse_args(argv)
-    return run_recipe(args.recipe)
+    return run_recipe(args.recipe, validate_only=args.validate_only)
 
 
 if __name__ == "__main__":
