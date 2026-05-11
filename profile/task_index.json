@@ -1,0 +1,296 @@
+{
+  "$schema": "https://raw.githubusercontent.com/m-dev-tools/.github/main/profile/task_index.schema.json",
+  "schema_compat": 1,
+  "schema_version": "1.0",
+  "kind": "m-dev-tools.task-index",
+  "_comment": "Plain-English user intent → primary typed-ID + see-alsos. The first lookup an AI agent should perform after llms.txt when handed a fresh user request. Hand-curated; the only routing source that isn't generated. Catalog-build (Phase-1 Track B) merges this into tools.json at build time. Typed-ID grammar enforced by task_index.schema.json/$defs/typedID — same as tools.schema.json's grammar.",
+
+  "categories": {
+    "workflow": {
+      "scaffold_new_project": {
+        "intent": "Start a new M project with TDD/CI scaffolding",
+        "primary": "cmd:m-cli#new",
+        "command": "m new myproj",
+        "analogue_go": "go mod init",
+        "analogue_rust": "cargo new"
+      },
+      "run_all_tests": {
+        "intent": "Run every test suite in the project",
+        "primary": "cmd:m-cli#test",
+        "command": "m test",
+        "analogue_go": "go test ./...",
+        "analogue_rust": "cargo test"
+      },
+      "run_one_test": {
+        "intent": "Run a single test by file::label",
+        "primary": "cmd:m-cli#test",
+        "command": "m test FILE.m::tHappyPath"
+      },
+      "watch_loop": {
+        "intent": "Sub-second TDD feedback — rerun affected tests on save",
+        "primary": "cmd:m-cli#watch",
+        "command": "m watch",
+        "analogue_go": "watchexec go test",
+        "analogue_rust": "cargo watch -x test"
+      },
+      "format_source": {
+        "intent": "Canonicalise M source layout",
+        "primary": "cmd:m-cli#fmt",
+        "command": "m fmt path/",
+        "analogue_go": "go fmt",
+        "analogue_rust": "cargo fmt"
+      },
+      "lint_source": {
+        "intent": "Static-analyze M source",
+        "primary": "cmd:m-cli#lint",
+        "command": "m lint path/",
+        "analogue_go": "go vet",
+        "analogue_rust": "cargo clippy"
+      },
+      "coverage_gate": {
+        "intent": "Enforce minimum coverage in CI",
+        "primary": "cmd:m-cli#coverage",
+        "command": "m coverage --min-percent=85"
+      },
+      "translate_compact_to_canonical": {
+        "intent": "Expand VistA-compact code (S X=1) to canonical names (SET X=1)",
+        "primary": "cmd:m-cli#fmt",
+        "command": "m fmt --rules=pythonic path/"
+      },
+      "scaffold_ci": {
+        "intent": "Drop a CI workflow into the project",
+        "primary": "cmd:m-cli#ci",
+        "command": "m ci init"
+      },
+      "pre_commit": {
+        "intent": "Block bad commits with fmt-check + lint",
+        "primary": "tool:m-cli",
+        "see_also": ["cmd:m-cli#fmt", "cmd:m-cli#lint"],
+        "config": ".pre-commit-config.yaml referencing m-cli's .pre-commit-hooks.yaml"
+      },
+      "self_check": {
+        "intent": "Verify ydb / parser / m-standard / manifests resolve",
+        "primary": "cmd:m-cli#doctor",
+        "command": "m doctor"
+      },
+      "lookup_stdlib_symbol": {
+        "intent": "What does parse^STDJSON do? Show signature + examples",
+        "primary": "cmd:m-cli#doc",
+        "command": "m doc parse^STDJSON"
+      },
+      "search_stdlib": {
+        "intent": "Find stdlib functions by keyword",
+        "primary": "cmd:m-cli#search",
+        "command": "m search uuid"
+      },
+      "editor_setup": {
+        "intent": "Configure VS Code for M development",
+        "primary": "tool:tree-sitter-m-vscode",
+        "see_also": ["tool:m-stdlib-vscode", "cmd:m-cli#lsp"]
+      }
+    },
+
+    "lib": {
+      "assertions": {
+        "intent": "Write tests with rich assertions",
+        "primary": "module:m-stdlib#STDASSERT",
+        "example": "do eq^STDASSERT(.pass,.fail,actual,expected,\"desc\")"
+      },
+      "fixtures": {
+        "intent": "Per-test setup/teardown isolation",
+        "primary": "module:m-stdlib#STDFIX",
+        "see_also": ["cmd:m-cli#test"]
+      },
+      "mocks": {
+        "intent": "Intercept calls during tests",
+        "primary": "module:m-stdlib#STDMOCK"
+      },
+      "snapshot_testing": {
+        "intent": "Compare structured output against a saved snapshot",
+        "primary": "module:m-stdlib#STDSNAP"
+      },
+      "profiling": {
+        "intent": "Wall-clock measure spans of M code",
+        "primary": "module:m-stdlib#STDPROF"
+      },
+      "json_parse": {
+        "intent": "Parse JSON text into an M tree",
+        "primary": "module:m-stdlib#STDJSON",
+        "example": "do parse^STDJSON(jsonText,.tree)"
+      },
+      "json_serialize": {
+        "intent": "Serialize an M tree to JSON text",
+        "primary": "module:m-stdlib#STDJSON"
+      },
+      "regex": {
+        "intent": "Pattern-match strings",
+        "primary": "module:m-stdlib#STDREGEX"
+      },
+      "csv_parse": {
+        "intent": "Parse RFC 4180 CSV",
+        "primary": "module:m-stdlib#STDCSV"
+      },
+      "xml_parse": {
+        "intent": "Parse XML; query with XPath subset",
+        "primary": "module:m-stdlib#STDXML"
+      },
+      "toml_parse": {
+        "intent": "Parse TOML configuration",
+        "primary": "module:m-stdlib#STDTOML"
+      },
+      "http_client": {
+        "intent": "Make HTTP/1.1 requests",
+        "primary": "module:m-stdlib#STDHTTP",
+        "example": "set rsp=$$get^STDHTTP(\"https://api.example.com/users\")",
+        "note": "client only — m-stdlib does not ship an HTTP server"
+      },
+      "url_parse": {
+        "intent": "Parse / build / normalize URIs",
+        "primary": "module:m-stdlib#STDURL"
+      },
+      "datetime": {
+        "intent": "Work with ISO-8601 dates and durations",
+        "primary": "module:m-stdlib#STDDATE"
+      },
+      "logging": {
+        "intent": "Emit structured log lines",
+        "primary": "module:m-stdlib#STDLOG"
+      },
+      "file_io": {
+        "intent": "Read / write files",
+        "primary": "module:m-stdlib#STDFS"
+      },
+      "env_vars": {
+        "intent": "Read environment variables / cmdline",
+        "primary": "module:m-stdlib#STDOS",
+        "see_also": ["module:m-stdlib#STDENV"]
+      },
+      "dotenv": {
+        "intent": "Load .env file with typed accessors",
+        "primary": "module:m-stdlib#STDENV"
+      },
+      "argparse": {
+        "intent": "Parse CLI flags + subcommands",
+        "primary": "module:m-stdlib#STDARGS"
+      },
+      "uuid": {
+        "intent": "Generate UUIDs (v4 random or v7 sortable)",
+        "primary": "module:m-stdlib#STDUUID"
+      },
+      "base64": {
+        "intent": "Base64 encode / decode",
+        "primary": "module:m-stdlib#STDB64"
+      },
+      "hex": {
+        "intent": "Hex encode / decode",
+        "primary": "module:m-stdlib#STDHEX"
+      },
+      "sha_hmac": {
+        "intent": "Compute SHA-256/384/512 + HMAC",
+        "primary": "module:m-stdlib#STDCRYPTO"
+      },
+      "random_secure": {
+        "intent": "Cryptographically secure random bytes / tokens",
+        "primary": "module:m-stdlib#STDCSPRNG"
+      },
+      "compression": {
+        "intent": "gzip / deflate / zstd compress + decompress",
+        "primary": "module:m-stdlib#STDCOMPRESS"
+      },
+      "string_format": {
+        "intent": "Printf-style formatting",
+        "primary": "module:m-stdlib#STDFMT"
+      },
+      "string_helpers": {
+        "intent": "Common string operations",
+        "primary": "module:m-stdlib#STDSTR"
+      },
+      "collections": {
+        "intent": "Set / Map / Stack / Queue / Heap / OrderedDict",
+        "primary": "module:m-stdlib#STDCOLL"
+      },
+      "lru_cache": {
+        "intent": "Bounded cache with TTL",
+        "primary": "module:m-stdlib#STDCACHE"
+      },
+      "higher_order": {
+        "intent": "map / filter / reduce over arrays",
+        "primary": "module:m-stdlib#STDXFRM"
+      },
+      "math": {
+        "intent": "clamp / min / max / sum / mean",
+        "primary": "module:m-stdlib#STDMATH"
+      },
+      "semver": {
+        "intent": "Parse / compare SemVer strings",
+        "primary": "module:m-stdlib#STDSEMVER"
+      },
+      "fixtures_fileman": {
+        "intent": "Load FileMan record fixtures from TSV/JSON manifest",
+        "primary": "module:m-stdlib#STDSEED"
+      }
+    },
+
+    "language": {
+      "is_keyword_portable": {
+        "intent": "Does this command/function run on both YDB and IRIS?",
+        "primary": "data:m-standard#pragmatic_standard"
+      },
+      "is_keyword_ansi_standard": {
+        "intent": "Is this part of the ANSI M standard?",
+        "primary": "data:m-standard#commands"
+      },
+      "is_keyword_va_sac_clean": {
+        "intent": "Does the VA SAC permit this in VistA code?",
+        "primary": "data:m-standard#va_sac_rules"
+      },
+      "all_keywords_for_grammar": {
+        "intent": "Need every command/function/ISV with provenance for a parser/linter",
+        "primary": "data:m-standard#grammar_surface"
+      },
+      "ydb_specific_token": {
+        "intent": "Which $Z* / Z* tokens are YDB extensions?",
+        "primary": "data:m-standard#intrinsic_functions"
+      },
+      "iris_specific_token": {
+        "intent": "Which $Z* / Z* tokens are IRIS extensions?",
+        "primary": "data:m-standard#intrinsic_functions"
+      }
+    },
+
+    "infra": {
+      "docker_yottadb": {
+        "intent": "Run YottaDB in a container for tests",
+        "primary": "tool:m-test-engine",
+        "command": "make -C ~/m-dev-tools/m-test-engine up"
+      },
+      "test_corpus_modern": {
+        "intent": "Validate against modern non-VistA M code",
+        "primary": "tool:m-modern-corpus"
+      },
+      "test_corpus_vista": {
+        "intent": "Validate against VistA's 39,330-routine corpus",
+        "primary": "tool:tree-sitter-m",
+        "see_also": ["cmd:m-cli#lint"]
+      }
+    },
+
+    "history": {
+      "why_does_m_dev_tools_exist": {
+        "intent": "Read the original gap analysis that justified the org",
+        "primary": "tool:m-tools",
+        "doc": "https://github.com/m-dev-tools/m-tools/blob/main/docs/gap-analysis-and-remediation-strategy.md"
+      },
+      "go_rust_python_analogues": {
+        "intent": "How does m-cli map to go/cargo/poetry?",
+        "primary": "tool:m-tools",
+        "doc": "https://github.com/m-dev-tools/m-tools/blob/main/docs/m-tool-gap-analysis.md"
+      },
+      "tier1_strategy": {
+        "intent": "What was the original Tier 1 deliverable scope?",
+        "primary": "tool:m-tools",
+        "doc": "https://github.com/m-dev-tools/m-tools/blob/main/docs/m-tooling-tier1.md"
+      }
+    }
+  }
+}

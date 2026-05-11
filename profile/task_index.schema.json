@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/m-dev-tools/.github/main/profile/task_index.schema.json",
+  "title": "m-dev-tools org task_index",
+  "description": "Validation contract for .github/profile/task_index.json — the hand-curated routing layer of the AI-discoverability stack. Maps plain-English user intent to typed-ID references (cmd:, module:, data:, tool:, etc.) inside the m-dev-tools org. Catalog-build merges this file into tools.json at build time, so the merged result also validates against tools.schema.json's task_index $ref (see schema_compat note in tools.schema.json).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_compat", "schema_version", "kind", "categories"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri"
+    },
+    "schema_compat": {
+      "description": "Compatibility integer. Only bumps on non-additive (breaking) schema changes. Every bump must add a row to profile/schema-changelog.md.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+(\\.[0-9]+)?$"
+    },
+    "kind": {
+      "const": "m-dev-tools.task-index"
+    },
+    "_comment": {
+      "type": "string"
+    },
+    "categories": {
+      "description": "Top-level routing categories (workflow / lib / language / infra / history / …). Each category is a map of intent-key → intent-row. Adding a new category is additive and does not bump schema_compat; renaming or removing one does.",
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/$defs/intent"
+        },
+        "propertyNames": {
+          "pattern": "^[a-z][a-z0-9_]*$"
+        }
+      },
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]*$"
+      }
+    }
+  },
+  "$defs": {
+    "typedID": {
+      "description": "Typed catalog identifier. Must match tools.schema.json's typedID grammar. Duplicated here so this file validates standalone.",
+      "type": "string",
+      "pattern": "^(tool|cmd|module|rule|doc|data|workflow|task|recipe):[a-z0-9_-]+(#[A-Za-z0-9._-]+)?$"
+    },
+    "typedIDList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/typedID"
+      }
+    },
+    "intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent", "primary"],
+      "properties": {
+        "intent": {
+          "description": "Plain-English description — the routing key. AI agents fuzzy-match user requests against this string.",
+          "type": "string",
+          "minLength": 1
+        },
+        "primary": {
+          "$ref": "#/$defs/typedID"
+        },
+        "see_also": {
+          "$ref": "#/$defs/typedIDList"
+        },
+        "command": {
+          "type": "string",
+          "description": "Optional concrete shell command exemplar."
+        },
+        "example": {
+          "type": "string",
+          "description": "Optional M source snippet exemplar."
+        },
+        "note": {
+          "type": "string"
+        },
+        "config": {
+          "type": "string",
+          "description": "Optional config-file reference (e.g. `.pre-commit-config.yaml`)."
+        },
+        "doc": {
+          "type": "string",
+          "format": "uri",
+          "description": "Optional canonical doc URL."
+        },
+        "analogue_go": {
+          "type": "string",
+          "description": "How this maps to Go's toolchain (e.g. `go fmt`)."
+        },
+        "analogue_rust": {
+          "type": "string",
+          "description": "How this maps to Rust's toolchain (e.g. `cargo fmt`)."
+        },
+        "analogue_python": {
+          "type": "string",
+          "description": "How this maps to Python's toolchain (e.g. `ruff format`)."
+        }
+      }
+    }
+  }
+}
