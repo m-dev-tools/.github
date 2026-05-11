@@ -1,3 +1,10 @@
 __pycache__/
 *.pyc
 .DS_Store
+
+# Phase 3 leftover: an early Track C agent run copied recipe / task_index
+# / tools schemas into the offline-fixtures dir. They are byte-identical
+# duplicates of profile/*.schema.json, and the discovery-protocol test
+# loads schemas from profile/ (not from fixtures/) — confirmed at
+# test-discovery-protocol.py:56-57. Ignored rather than tracked.
+/profile/build/fixtures/*.schema.json
