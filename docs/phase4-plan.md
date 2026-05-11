@@ -46,12 +46,14 @@ TDD test suite.
 |---|---|---|
 | **Phase 1** (org routing layer) | Stable `profile/tools.json` + `profile/task_index.json` schemas; both schema-validated in CI. The MCP server consumes both as its source of truth. | ✅ **CLOSED 2026-05-10** — `make catalog && make validate-catalog` green in CI; `make catalog` byte-idempotent against `origin/main`. |
 | **Phase 2** (tier-2 + tier-3 manifests) | `tools.json` has manifest-bearing entries for every repo the MCP server's `describe` and `verify` tools might be asked about. | ✅ **CLOSED 2026-05-10** — all 9 active repos onboarded; `tools.json` carries `repo_meta_url` + `verification_commands`-resolvable pointers for each. |
-| **Phase 3** (recipes + handshake test) | `profile/build/test-discovery-protocol.py` is the reference implementation of the routing trail. The MCP server's `route_intent` reuses its lookup logic (or imports its helpers). | 🟡 **In flight** — phase3-plan landed as PR #15; tracks A → B+C+D → E in progress on `origin/main`. Phase 4 Track B (MCP-tool implementation) consumes Phase 3 Track C2's `test-discovery-protocol.py` once it ships. |
+| **Phase 3** (recipes + handshake test) | `profile/build/test-discovery-protocol.py` is the reference implementation of the routing trail. The MCP server's `route_intent` and `describe` reuse its lookup helpers (importable: `match_intent`, `parse_typed_id`, `resolve_module_manifest_url`, `find_module_entry`, `entry_has_signature_and_example`, `fetch`). | ✅ **CLOSED 2026-05-11** — see [`phase3-evidence.md`](phase3-evidence.md). PR wave (in merge order): #19 (§0 blockers); #20 (Track A — `recipe.schema.json` + `docs/recipes/README.md` + 7 task_index recipe intents); #22 (Track C — `test-discovery-protocol.py` + `run-recipe.py` with TDD); #23 (Track B — 4 shipped recipes); #24 (Tracks D+E — `make recipes-check` + `make handshake` + CI on push/PR + Monday-14:00-UTC cron + evidence). 51/51 pytest cases. |
 
-**Phase 4 may start at Phase 3 C2** (the handshake-test implementation
-stage). Tracks A (repo scaffold) and D (catalog onboarding) are independent
-of Phase 3 and can start now. Track B blocks on Phase 3 C2. Track C
-(client-integration smoke) consumes Tracks B + D and runs last.
+All three upstream phases are now closed. Phase 4 is fully unblocked:
+Tracks A (repo scaffold) and D (catalog onboarding) were independent of
+Phase 3 from the start; Track B's prior wait on Phase 3 C2 is resolved —
+the importable lookup helpers it consumes are on `.github/main` at
+`profile/build/test-discovery-protocol.py`. Track C (client-integration
+smoke) still consumes Tracks B + D and runs last.
 
 Verification commands (re-runnable to confirm the launch state hasn't
 regressed):
@@ -59,8 +61,10 @@ regressed):
 ```bash
 cd .github
 make catalog && make validate-catalog && make phase0-smoke
-# Phase 3 handshake (once it ships) — Track B's logic builds on this:
-python3 profile/build/test-discovery-protocol.py --live
+# Phase 3 handshake — Track B's lookup logic delegates to this script:
+make handshake                                       # offline fixtures
+python3 profile/build/test-discovery-protocol.py --live  # live URLs
+make recipes-check                                   # recipe structural gate
 ```
 
 ---
@@ -98,7 +102,7 @@ B/C/D finish.
 | Track | Repo | Purpose | Blocked by | Stages |
 |---|---|---|---|---|
 | **A** | `m-dev-tools-mcp` (new) | Scaffold new repo with Phase-0 contract: AGENTS.md, dist/repo.meta.json, Makefile, MCP SDK skeleton, TDD harness | — | A1 → A7 |
-| **B** | `m-dev-tools-mcp` | TDD-build the three MCP tools (`route_intent`, `describe`, `verify`) | A7 ∧ Phase 3 C2 | B1 → B6 |
+| **B** | `m-dev-tools-mcp` | TDD-build the three MCP tools (`route_intent`, `describe`, `verify`) — reuses Phase 3's discovery helpers | A7 | B1 → B6 |
 | **C** | `m-dev-tools-mcp` | Claude Code integration smoke — `.mcp.json` config + end-to-end intent → typed-ID round-trip | B6 | C1 → C4 |
 | **D** | `.github` + `m-dev-tools-mcp` | Cut v0.1.0 GitHub Release with attached wheel; onboard `tool:m-dev-tools-mcp` to `profile/tools.json` | B6 | D1 → D5 |
 | **E** | `.github` | Phase 4 smoke + evidence + close-out PR | C4 ∧ D5 | E1 → E3 |
@@ -127,6 +131,31 @@ since both consume B).
 Same as Phase 0 / Phase 1 / Phase 3. Each stage is one of: `todo`, `doing`,
 `done`, `blocked`. A stage is `done` only when its verification command
 exits 0.
+
+### What Phase 3 already shipped that Phase 4 consumes
+
+Track B (MCP tools) and Track E (smoke + evidence) lean on Phase 3
+artifacts that already live on `.github/main`. Track B should `import`
+from them rather than reimplement the routing trail.
+
+| Phase 3 artifact | Location | Phase 4 use |
+|---|---|---|
+| Discovery-handshake helpers | `profile/build/test-discovery-protocol.py` (functions `match_intent`, `parse_typed_id`, `resolve_module_manifest_url`, `find_module_entry`, `entry_has_signature_and_example`, `fetch`, `extract_llms_links`) | Track B's `route_intent` / `describe` import these directly; no reimplementation. |
+| Offline catalog fixtures | `profile/build/fixtures/` — `llms.txt`, `tools.json`, `task_index.json`, `stdlib-manifest.json`, `repo.meta.json` | Track B's TDD fixtures (B1 / B3 / B5) — copy or symlink into the MCP repo's `tests/fixtures/` so the unit tests don't hit raw-GitHub. |
+| Recipe schema + 4 shipped recipes | `profile/recipe.schema.json` + `docs/recipes/{new-app-tdd-ci,use-stdlib-module,add-stdlib-module,add-lint-rule}.md` | Track B's `describe("recipe:new-app-tdd-ci")` — the typed ID resolves through `task_index.json`'s `recipes` category (committed as part of PR #20). |
+| `make handshake` + `make recipes-check` | `.github/Makefile` | Track E's E1 evidence script already invokes both; no Make changes needed in this phase. |
+| Recipe runner with `--validate-only` | `profile/build/run-recipe.py` (PR #24) | Pattern reference for any "validate without executing" MCP tool surface Track B might add later (not in current scope). |
+
+### Out-of-scope Phase 3 follow-ups noted (do not address in Phase 4)
+
+- `run-recipe.py`'s minimal YAML parser does not handle `>` block scalars
+  or `[]` inline empty arrays. The four shipped recipes work around this.
+  Phase 4 does not parse recipe YAML — the MCP server reads
+  `task_index.json` for routing — so this limitation does not bite here.
+- Three orphan schema fixture files (`recipe.schema.json`,
+  `task_index.schema.json`, `tools.schema.json`) remain untracked under
+  `profile/build/fixtures/`. Track B should copy only the five tracked
+  fixtures listed above when seeding its `tests/fixtures/`.
 
 ---
 
@@ -246,8 +275,9 @@ Commit subject: `phase4-A: scaffold m-dev-tools-mcp (Phase-0 contract + CI)`.
 
 ## 3. Track B — Implement the three MCP tools
 
-Runs in `m-dev-tools-mcp`. Blocked by A7 (need the scaffold) and Phase 3 C2
-(need the handshake-test helpers; Track B imports its lookup logic).
+Runs in `m-dev-tools-mcp`. Blocked by A7 (need the scaffold). Phase 3
+closed 2026-05-11 so the discovery helpers Track B imports are already
+on `.github/main`.
 
 TDD throughout — write each test, confirm RED, implement, confirm GREEN.
 
@@ -255,8 +285,11 @@ TDD throughout — write each test, confirm RED, implement, confirm GREEN.
 
 **Output:** `tests/test_route_intent.py` (pytest).
 
-Fixtures: a frozen snapshot of `tools.json` + `task_index.json` (committed
-under `tests/fixtures/`). Test cases:
+Fixtures: copy Phase 3's bundled fixture set —
+`profile/build/fixtures/{llms.txt, tools.json, task_index.json,
+stdlib-manifest.json, repo.meta.json}` — into `tests/fixtures/` so the
+unit tests don't hit raw-GitHub. Track C's smoke script (separate from
+unit tests) is the path that exercises live fetches. Test cases:
 
 - Exact intent string match: `route_intent("Parse JSON in M")` returns
   `["module:m-stdlib#STDJSON"]` (or whatever the live `task_index.json`
@@ -272,19 +305,29 @@ Confirm RED before B2.
 
 ### B2 — Implement `route_intent`
 
-**Output:** `src/m_dev_tools_mcp/server.py` — `route_intent` tool.
+**Output:** `src/m_dev_tools_mcp/server.py` — `route_intent` tool. The
+exact-match path delegates to Phase 3's `match_intent` (vendored or
+imported from `.github`'s `test-discovery-protocol.py` — see the
+"What Phase 3 already shipped" subsection of §1). The fuzzy-rank path
+is the only new logic Phase 4 writes for this tool.
 
 ```python
+from m_dev_tools_mcp._discovery import match_intent  # vendored from .github
+
 @mcp.tool
 def route_intent(query: str) -> list[str]:
     """Return typed IDs matching the plain-English intent."""
-    ti = _fetch_task_index()       # cached fetch from origin/main
-    return _fuzzy_match(query, ti)
+    ti = _fetch_task_index()                 # cached fetch from origin/main
+    exact = match_intent(query, ti)          # Phase-3 helper
+    if exact:
+        return [exact]
+    return _fuzzy_rank(query, ti)            # Phase-4 fuzzy fallback
 ```
 
 Fuzzy match: case-folded substring against `intent` strings + lightweight
 token overlap. No external NLP deps — keeps the single-file constraint
-intact.
+intact. Vendoring (vs `pip install` from the meta-repo) keeps the MCP
+server's dependency graph at `mcp` + stdlib only.
 
 **Verify:** B1 tests green; `route_intent("parse JSON in M")` returns
 `["module:m-stdlib#STDJSON"]` against the live catalog.
@@ -300,8 +343,11 @@ Fixtures: same frozen catalog as B1. Test cases:
 - `describe("cmd:m-cli#test")` resolves to the m-cli entry + drills
   into `commands_url` to surface the per-subcommand description.
 - `describe("tool:m-cli")` returns the top-level tool entry.
-- `describe("recipe:new-app-tdd-ci")` resolves through `task_index.json`
-  to the recipe URL (Phase 3 dependency).
+- `describe("recipe:new-app-tdd-ci")` resolves through `task_index.json`'s
+  `recipes` category (shipped in PR #20) to the actual recipe at
+  `docs/recipes/new-app-tdd-ci.md` (shipped in PR #23). Confirm the
+  returned blob carries the recipe's HTTPS URL + raw-GitHub URL — both
+  are typical client follow-up reads.
 - `describe("invalid-id")` returns a structured error, not a crash.
 - Typed-ID grammar mismatch: rejected before catalog lookup.
 
@@ -311,11 +357,17 @@ Confirm RED before B4.
 
 **Output:** `src/m_dev_tools_mcp/server.py` — `describe` tool.
 
-Walks the catalog: parses the typed ID, looks up the appropriate slice of
-`tools.json` (or follows `exposes.*` pointers for `module:` / `cmd:` /
-`rule:` IDs), returns a JSON blob with the pointer URLs the caller should
-read next. Does **not** inline the underlying payloads — keeps the catalog's
-"pointers, not facts" invariant.
+Walks the catalog: parses the typed ID via Phase 3's `parse_typed_id`,
+looks up the appropriate slice of `tools.json` (using
+`resolve_module_manifest_url` for `module:` IDs), follows `exposes.*`
+pointers for `cmd:` / `rule:` IDs, returns a JSON blob with the pointer
+URLs the caller should read next. Does **not** inline the underlying
+payloads — keeps the catalog's "pointers, not facts" invariant.
+
+`recipe:` IDs are the new code path Phase 4 writes: a single lookup
+into `task_index.json`'s `recipes` category, returning the recipe's
+HTTPS + raw URLs. No Phase 3 helper covers this since recipes weren't
+in the routing trail at handshake-design time.
 
 **Verify:** B3 tests green; `describe("module:m-stdlib#STDJSON")` includes
 the m-stdlib manifest URL and the AGENTS.md URL.
@@ -514,13 +566,18 @@ catalog) — self-referential smoke that proves D3's entry is reachable.
 
 Runs in `.github`. Blocked by C4 and D5.
 
+Follows the Phase 1 / Phase 3 convention: a single
+`docs/phase4-evidence.md` file (no separate `phase4-status.md`). The
+stage-by-stage roll-up is folded into the evidence doc; phase0's split
+status/plan layout was an early convention that did not carry forward.
+
 ### E1 — Phase 4 smoke
 
-**Output:** evidence file `docs/phase4-evidence.txt`.
+**Output:** evidence file `docs/phase4-evidence.md`.
 
 ```bash
 make catalog && make validate-catalog && make handshake && make recipes-check \
-  && python3 - <<'PY' | tee -a docs/phase4-evidence.txt
+  && python3 - <<'PY' | tee -a docs/phase4-evidence.md
 import subprocess
 out = subprocess.check_output([
   "uvx", "--from",
@@ -533,26 +590,19 @@ print("PHASE4-EXIT OK:", out.strip())
 PY
 ```
 
+The terminal output is post-processed by hand into Markdown sections
+mirroring `phase3-evidence.md` (one section per gate; a "What this
+proves" wrap-up; a "Phase 4 closed" roll-up that walks each §11
+done-criterion).
+
 **Verify:** all targets exit 0; evidence captures the canonical-query
-round-trip.
+round-trip; every §11 done-criterion is cited green in the doc.
 
-### E2 — Update `phase4-status.md`
-
-**Output:** `docs/phase4-status.md` (analogous to `phase0-status.md`,
-`phase3-status.md`).
-
-Single file recording stage-by-stage status, blockers resolved, and a
-"Next" section pointing at Phase 5 (continuous enforcement hardening).
-Mark Phase 4 closed when all stages in §7's matrix are `done`.
-
-**Verify:** doc exists; every stage in §7 is marked `done`.
-
-### E3 — Close-out PR
+### E2 — Close-out PR
 
 Single PR. Commit subject: `phase4-E: smoke + evidence; Phase 4 closed`.
 
-**Verify:** PR merged; `phase4-evidence.txt` and `phase4-status.md` on
-`main`; Phase 5 unblocked.
+**Verify:** PR merged; `phase4-evidence.md` on `main`; Phase 5 unblocked.
 
 ---
 
@@ -567,7 +617,7 @@ Single PR. Commit subject: `phase4-E: smoke + evidence; Phase 4 closed`.
 | A5 | `m-dev-tools-mcp` | A4 | `make check-manifest && make check-agents` green |
 | A6 | `m-dev-tools-mcp` | A5 | initial CI run green |
 | A7 | `m-dev-tools-mcp` | A6 | PR merged; `repo_meta_url` resolves |
-| B1 | `m-dev-tools-mcp` | A7 ∧ Phase 3 C2 | RED tests |
+| B1 | `m-dev-tools-mcp` | A7 | RED tests |
 | B2 | `m-dev-tools-mcp` | B1 | B1 tests green; live-catalog round-trip works |
 | B3 | `m-dev-tools-mcp` | B2 | RED tests |
 | B4 | `m-dev-tools-mcp` | B3 | B3 tests green; pointer-blob includes manifest URL |
@@ -582,9 +632,8 @@ Single PR. Commit subject: `phase4-E: smoke + evidence; Phase 4 closed`.
 | D3 | `.github` | D2 | `make catalog && make validate-catalog && make phase0-smoke` green |
 | D4 | `.github` | D3 | `make catalog` byte-idempotent after README + llms.txt edits |
 | D5 | `.github` | D4 | PR merged; `describe("tool:m-dev-tools-mcp")` reachable on live catalog |
-| E1 | `.github` | C4 ∧ D5 | evidence file captures canonical-query round-trip |
-| E2 | `.github` | E1 | `phase4-status.md` shows every stage `done` |
-| E3 | `.github` | E2 | PR merged; Phase 5 unblocked |
+| E1 | `.github` | C4 ∧ D5 | `phase4-evidence.md` captures canonical-query round-trip + every §11 done-criterion cited green |
+| E2 | `.github` | E1 | PR merged; Phase 5 unblocked |
 
 ---
 
@@ -656,11 +705,20 @@ the loop but is not gating on agents being able to *use* the server.
   agent use; document in AGENTS.md that the server is not designed for
   high-frequency programmatic calls. Mitigation: cache the catalog
   in-memory for 60s within a single server process.
-- **Phase 3 dependency timing.** Track B blocks on Phase 3 C2
-  (the handshake-test implementation) because B2 reuses its lookup
-  helpers. If Phase 3 stalls, Track B stalls — but Track A and Track D
-  (everything except B2/B3/B4/B5/C/E) can still proceed. The Gantt
-  in §10 reflects this.
+- **Vendored Phase 3 helper drift.** Track B vendors (or imports) a
+  small set of pure functions from `.github`'s
+  `test-discovery-protocol.py` (`match_intent`, `parse_typed_id`,
+  `resolve_module_manifest_url`, `find_module_entry`,
+  `entry_has_signature_and_example`, `fetch`). If the upstream signature
+  changes, vendored copies drift silently. Mitigation: the MCP server's
+  TDD suite pins the function behaviors (input/output contracts) on
+  fixtures copied from `profile/build/fixtures/`. A future upstream
+  rename surfaces as a red unit test, not a runtime failure in a Claude
+  Code session. Track B's PR body must spell out the vendoring decision
+  so a future maintainer doesn't `pip install` the meta-repo to fix
+  drift (the meta-repo is not a Python package — it's a GitHub `.github`
+  org-meta repo). Per §5.3 of the parent plan: pointers, not facts —
+  vendoring small pure functions is the canonical exception.
 - **`m-cli-extras` plugin-leak in the manifest drift gate.** Phase-0
   onboarding for tier-3 repos surfaced this gotcha — a maintainer's
   local venv can introduce phantom entry points that fail
@@ -687,7 +745,7 @@ mcp tools (B)                    █████████████
 Claude Code smoke (C)                         ████████
 release + catalog (D)                         ████████
 Phase 4 smoke (E)                                     ████
-phase 3 (parallel)   ◄── unblocked; sequence as planned ──►
+phase 3 (closed 2026-05-11) ✅ — all helpers on .github/main
 ```
 
 - A is one week. B is two-to-three weeks (TDD across three tools).
@@ -720,18 +778,18 @@ Phase 4 is done when **all** of these are true:
    at the m-dev-tools catalog").
 6. `examples/claude-code/` in the MCP-server repo contains a working
    `.mcp.json`, a smoke script, and a recorded session transcript.
-7. `docs/phase4-evidence.txt` in `.github` captures a clean run of
+7. `docs/phase4-evidence.md` in `.github` captures a clean run of
    `make catalog && make validate-catalog && make handshake &&
-   make recipes-check` *plus* the canonical `route_intent` round-trip.
-8. `docs/phase4-status.md` shows every stage in §7's matrix marked
-   `done`.
-9. The MCP server answers `route_intent("parse JSON in M")` with
+   make recipes-check` *plus* the canonical `route_intent` round-trip,
+   with each criterion in this list cited green (same pattern as
+   `phase3-evidence.md`).
+8. The MCP server answers `route_intent("parse JSON in M")` with
    `module:m-stdlib#STDJSON` from a fresh `uvx --from git+...@v0.1.0`
    install — the parent-plan exit criterion, reproducible from a
    clean environment.
-10. CI is green on both `.github/main` and `m-dev-tools-mcp/main`.
+9. CI is green on both `.github/main` and `m-dev-tools-mcp/main`.
 
-When all ten are true, Phase 5 (continuous enforcement hardening) is
+When all nine are true, Phase 5 (continuous enforcement hardening) is
 unblocked. PyPI publishing is *deliberately* not on this list — it's
 re-evaluated as a follow-up after Phase 5 once external adoption
 demonstrates the API + name are worth the irreversible commitment.
