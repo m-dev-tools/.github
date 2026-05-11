@@ -69,6 +69,14 @@ jobs:
         # bumping `verified_on`.
         run: make recipes-check
 
+      - name: Freshness gate (Phase-5 Track A — PR-mode)
+        # Per phase5-plan.md §2 A3: PR-mode runs default thresholds
+        # (--warn-days 90 --stale-days 180; WARN allowed). The weekly
+        # cron firing (handshake job below) adds --strict to escalate
+        # WARN to failure so a freshness slip surfaces within 7 days.
+        if: github.event_name != 'schedule'
+        run: make check-freshness
+
   handshake:
     # Phase-3 Track D — discovery-protocol handshake. Runs the 8-step
     # external-agent walk-through end-to-end. On push/PR uses bundled
@@ -92,3 +100,11 @@ jobs:
       - name: Discovery-protocol handshake (live URLs)
         if: github.event_name == 'schedule'
         run: python3 profile/build/test-discovery-protocol.py --live
+
+      - name: Freshness gate (Phase-5 Track A — cron --strict)
+        # Phase-5 Track A weekly escalation: --strict treats WARN as
+        # failure too, so a maintainer who let verified_on slip past
+        # the 90-day warn threshold sees it within 7 days even if no
+        # PR is opened in between.
+        if: github.event_name == 'schedule'
+        run: python3 profile/build/check-freshness.py --offline --strict

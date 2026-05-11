@@ -1,4 +1,4 @@
-.PHONY: catalog validate-catalog check-catalog check-repo-meta phase0-smoke check-docs-prose recipes-check handshake
+.PHONY: catalog validate-catalog check-catalog check-repo-meta phase0-smoke check-docs-prose recipes-check handshake check-freshness
 
 # Phase-1 Track B's generator. Fetches each TIER_1+TIER_2+TIER_3 repo's
 # dist/repo.meta.json, validates it, translates it into a `tools.<key>`
@@ -100,3 +100,11 @@ recipes-check:
 # upstream URL drift between merges.
 handshake:
 	python3 profile/build/test-discovery-protocol.py --offline
+
+# Phase-5 Track A: freshness gate over every tools.json entry's
+# verified_on field plus every recipe frontmatter's verified_on.
+# Per-PR runs default thresholds (--warn-days 90 --stale-days 180);
+# the weekly cron firing adds --strict to escalate WARN into a
+# failure so a freshness slip surfaces within 7 days.
+check-freshness:
+	python3 profile/build/check-freshness.py --offline
