@@ -77,9 +77,14 @@ def _run_handshake(*args: str, cwd: Path | None = None) -> subprocess.CompletedP
     )
 
 
-def _run_recipe(arg: str | Path, cwd: Path | None = None) -> subprocess.CompletedProcess:
+def _run_recipe(
+    arg: str | Path,
+    cwd: Path | None = None,
+    *,
+    extra_args: tuple[str, ...] = (),
+) -> subprocess.CompletedProcess:
     return subprocess.run(
-        [sys.executable, str(RECIPE_RUNNER), str(arg)],
+        [sys.executable, str(RECIPE_RUNNER), *extra_args, str(arg)],
         capture_output=True,
         text=True,
         timeout=120,
@@ -542,3 +547,89 @@ The captured stdout must contain: `/tmp`.
     assert not (tmp_path / "sentinel-from-recipe").exists(), (
         "recipe ran in the recipe-file directory, not a mktemp -d"
     )
+
+
+# ====================================================== --validate-only ===
+
+
+VALIDATE_ONLY_RECIPE_NO_ASSERTIONS = """\
+---
+id: recipe:fixture-no-assertions
+title: Validate-only fails when no must-contain assertions are declared
+intent: Validate-only fails when no must-contain assertions are declared
+touches:
+  - cmd:m-cli#test
+verified_on: 2026-05-11
+ci_verifiable: true
+tier: tier-1
+---
+
+# No assertions
+
+## Steps
+
+```bash
+echo hello
+```
+
+## Expected output
+
+(no must-contain rows)
+"""
+
+
+def test_recipe_runner_validate_only_happy_path(tmp_path):
+    """--validate-only on a well-formed recipe must exit 0 without running
+    the bash block. We assert exit 0 + 'VALIDATE:' in stdout."""
+    p = _write_recipe(tmp_path, "smoke.md", SIMPLE_RECIPE)
+    result = _run_recipe(p, extra_args=("--validate-only",))
+    assert result.returncode == RUN_OK, (
+        f"validate-only should succeed; rc={result.returncode}, "
+        f"stdout={result.stdout!r}, stderr={result.stderr!r}"
+    )
+    assert "VALIDATE:" in result.stdout
+    # The bash block must not have executed — no 'OK:' (the exec-mode
+    # success token) and no echo'd stdout from the recipe body.
+    assert "OK:" not in result.stdout
+    assert "hello recipe-runner" not in result.stdout
+
+
+def test_recipe_runner_validate_only_still_skips_manual(tmp_path):
+    """ci_verifiable: false short-circuits earlier than the validate-only
+    branch, so we still get a SKIP line on manual recipes."""
+    p = _write_recipe(tmp_path, "manual.md", MANUAL_CHECKLIST_RECIPE)
+    result = _run_recipe(p, extra_args=("--validate-only",))
+    assert result.returncode == RUN_OK
+    assert "SKIP" in result.stdout
+
+
+def test_recipe_runner_validate_only_rejects_bad_frontmatter(tmp_path):
+    p = _write_recipe(tmp_path, "bad.md", BAD_FRONTMATTER_RECIPE)
+    result = _run_recipe(p, extra_args=("--validate-only",))
+    assert result.returncode == RUN_FRONTMATTER_INVALID
+
+
+def test_recipe_runner_validate_only_rejects_missing_assertions(tmp_path):
+    """ci_verifiable: true with no 'must contain: …' rows must fail
+    validation — otherwise CI is gating on nothing."""
+    p = _write_recipe(tmp_path, "no-assertions.md", VALIDATE_ONLY_RECIPE_NO_ASSERTIONS)
+    result = _run_recipe(p, extra_args=("--validate-only",))
+    assert result.returncode == RUN_FRONTMATTER_INVALID, (
+        f"recipe with zero must-contain assertions should be rejected; "
+        f"rc={result.returncode}, stderr={result.stderr!r}"
+    )
+
+
+def test_repo_recipes_all_pass_validate_only():
+    """Every committed recipe under docs/recipes/ must pass
+    --validate-only. This is the same gate CI runs."""
+    recipes_dir = Path(__file__).resolve().parents[2] / "docs" / "recipes"
+    md_files = sorted(p for p in recipes_dir.glob("*.md") if p.name != "README.md")
+    assert md_files, f"no recipes found under {recipes_dir}"
+    for recipe in md_files:
+        result = _run_recipe(recipe, extra_args=("--validate-only",))
+        assert result.returncode == RUN_OK, (
+            f"{recipe.name} failed --validate-only; "
+            f"rc={result.returncode}, stderr={result.stderr!r}, "
+            f"stdout={result.stdout!r}"
+        )

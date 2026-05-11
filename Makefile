@@ -1,4 +1,4 @@
-.PHONY: catalog validate-catalog check-catalog check-repo-meta phase0-smoke check-docs-prose
+.PHONY: catalog validate-catalog check-catalog check-repo-meta phase0-smoke check-docs-prose recipes-check handshake
 
 # Phase-1 Track B's generator. Fetches each TIER_1+TIER_2+TIER_3 repo's
 # dist/repo.meta.json, validates it, translates it into a `tools.<key>`
@@ -74,3 +74,29 @@ check-docs-prose:
 	  exit 1; \
 	fi; \
 	echo "check-docs-prose: docs/ is prose-only ✓"
+
+# Phase-3 Track D: structural gate over every recipe under docs/recipes/.
+# Validates frontmatter, presence of a ``## Steps`` bash block, and at
+# least one ``must contain: …`` row under ``## Expected output`` — but
+# does NOT execute the bash. The full executable run is a maintainer's
+# job when bumping ``verified_on`` (the toolchain a recipe drives may
+# not be installable in the meta-repo's CI image).
+recipes-check:
+	@found=0; failed=0; \
+	for recipe in docs/recipes/*.md; do \
+	  [ "$$(basename $$recipe)" = "README.md" ] && continue; \
+	  found=$$((found+1)); \
+	  python3 profile/build/run-recipe.py --validate-only $$recipe || failed=$$((failed+1)); \
+	done; \
+	if [ "$$found" -eq 0 ]; then echo "ERROR: no recipes found under docs/recipes/" >&2; exit 1; fi; \
+	if [ "$$failed" -gt 0 ]; then echo "ERROR: $$failed recipe(s) failed --validate-only" >&2; exit 1; fi; \
+	echo "recipes-check: $$found recipe(s) clean"
+
+# Phase-3 Track D: the 8-step discovery-protocol handshake test. Drives
+# the recipe runner + offline fixture set through the same flow an
+# external AI agent would follow (intent → typed-ID → manifest →
+# example → recipe). Defaults to --offline (bundled fixtures); the CI
+# weekly cron explicitly invokes the script with --live to surface
+# upstream URL drift between merges.
+handshake:
+	python3 profile/build/test-discovery-protocol.py --offline

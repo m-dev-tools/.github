@@ -5,6 +5,13 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  schedule:
+    # Phase-3 Track D weekly handshake. Drives the full 8-step
+    # discovery protocol against the *live* fixture URLs to surface
+    # upstream drift (a renamed manifest field, a 404'd llms.txt link)
+    # between merges. PRs still get the offline-fixtures run via the
+    # `check` job below.
+    - cron: '0 14 * * 1'
 
 jobs:
   check:
@@ -52,3 +59,36 @@ jobs:
         run: |
           make catalog
           git diff --exit-code profile/tools.json profile/task_index.json
+
+      - name: Recipe structural gate (Phase-3 Track D)
+        # Every recipe under docs/recipes/*.md must pass --validate-only:
+        # well-formed frontmatter, a ``## Steps`` bash block, and at
+        # least one ``must contain: …`` assertion under ``## Expected
+        # output``. The M toolchain isn't installed here so we don't
+        # actually execute the recipe — that's a maintainer task when
+        # bumping `verified_on`.
+        run: make recipes-check
+
+  handshake:
+    # Phase-3 Track D — discovery-protocol handshake. Runs the 8-step
+    # external-agent walk-through end-to-end. On push/PR uses bundled
+    # offline fixtures; the weekly cron firing (see `schedule` above)
+    # is the place to swap in --live for upstream-drift detection.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install --upgrade pip 'jsonschema>=4.18'
+
+      - name: Discovery-protocol handshake (offline fixtures)
+        if: github.event_name != 'schedule'
+        run: make handshake
+
+      - name: Discovery-protocol handshake (live URLs)
+        if: github.event_name == 'schedule'
+        run: python3 profile/build/test-discovery-protocol.py --live
