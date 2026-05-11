@@ -169,6 +169,17 @@ def validate_schema(data: dict, errors: list[str]) -> None:
         errors.append(f"schema: at {path}: {exc.message}")
 
 
+# Extensions whose payloads are binary by design — never UTF-8-decode
+# them. The validator's job for these is "does the URL resolve?", not
+# "is the body valid text". Matches phase5-plan.md §3 B0.
+_BINARY_EXTENSIONS = (".whl", ".tar.gz", ".tgz", ".zip", ".gz")
+
+
+def _is_binary_url(target: str) -> bool:
+    lower = target.lower()
+    return any(lower.endswith(ext) for ext in _BINARY_EXTENSIONS)
+
+
 def resolve_one(base: str, value: str, errors: list[str], label: str) -> None:
     if URL_RE.match(value):
         target = value
@@ -185,13 +196,19 @@ def resolve_one(base: str, value: str, errors: list[str], label: str) -> None:
             except json.JSONDecodeError as exc:
                 errors.append(f"exposes[{label}]: {local} is invalid JSON: {exc}")
         return
+
+    binary = _is_binary_url(target)
     try:
         with urllib.request.urlopen(target, timeout=15) as resp:
-            body = resp.read().decode("utf-8")
+            # For binary URLs we only need "did the server answer?".
+            # Skip the body read entirely so a non-UTF-8 payload (a wheel,
+            # a tarball, ...) doesn't trip a decode error. Text URLs still
+            # read + decode so the downstream JSON check has a body.
+            body = "" if binary else resp.read().decode("utf-8")
     except (urllib.error.URLError, TimeoutError) as exc:
         errors.append(f"exposes[{label}]: cannot fetch {target}: {exc}")
         return
-    if target.endswith(".json"):
+    if not binary and target.endswith(".json"):
         try:
             json.loads(body)
         except json.JSONDecodeError as exc:

@@ -77,6 +77,13 @@ jobs:
         if: github.event_name != 'schedule'
         run: make check-freshness
 
+      - name: Link inventory (Phase-5 Track B — PR-mode)
+        # Per phase5-plan.md §3 B3: PR-mode runs --offline so CI is
+        # network-free + flake-free. The weekly cron firing (handshake
+        # job below) does the actual HEAD walk against the live URLs.
+        if: github.event_name != 'schedule'
+        run: make check-links
+
   handshake:
     # Phase-3 Track D — discovery-protocol handshake. Runs the 8-step
     # external-agent walk-through end-to-end. On push/PR uses bundled
@@ -108,3 +115,11 @@ jobs:
         # PR is opened in between.
         if: github.event_name == 'schedule'
         run: python3 profile/build/check-freshness.py --offline --strict
+
+      - name: Link-check (Phase-5 Track B — cron live URLs)
+        # Phase-5 Track B weekly fetch: HEAD every URL in llms.txt +
+        # tools.json + task_index.json against the live web. A 404 or
+        # transport failure surfaces here within 7 days even if no PR
+        # opens in between. Per-PR jobs use --offline (see above).
+        if: github.event_name == 'schedule'
+        run: python3 profile/build/check-links.py

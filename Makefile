@@ -1,4 +1,4 @@
-.PHONY: catalog validate-catalog check-catalog check-repo-meta phase0-smoke check-docs-prose recipes-check handshake check-freshness
+.PHONY: catalog validate-catalog check-catalog check-repo-meta phase0-smoke check-docs-prose recipes-check handshake check-freshness check-links
 
 # Phase-1 Track B's generator. Fetches each TIER_1+TIER_2+TIER_3 repo's
 # dist/repo.meta.json, validates it, translates it into a `tools.<key>`
@@ -108,3 +108,10 @@ handshake:
 # failure so a freshness slip surfaces within 7 days.
 check-freshness:
 	python3 profile/build/check-freshness.py --offline
+
+# Phase-5 Track B: link-checking gate over llms.txt + tools.json's
+# *_url fields + task_index.json's doc fields. Per-PR runs --offline
+# (inventory only — no network); the weekly cron firing runs the
+# full HEAD walk so broken upstream URLs surface within 7 days.
+check-links:
+	python3 profile/build/check-links.py --offline
