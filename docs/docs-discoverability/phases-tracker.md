@@ -1,7 +1,7 @@
 ---
 created: 2026-05-11
 last_modified: 2026-05-11
-revisions: 0
+revisions: 2
 doc_type: [STATUS]
 lifecycle: active
 owner: rmrich5
@@ -169,8 +169,7 @@ will add the cross-repo link extension and the freshness-cron rows.
 ## 7. Open issues encountered during execution
 
 Captured here as a running log so they survive across owner changes.
-Empty for now.
 
 | Date | Issue | Phase | Resolution |
 |---|---|---|---|
-| — | — | — | — |
+| 2026-05-11 | Two PRs were titled `docs: ...` but their squash-merge actually contained docs + parallel Phase 1/Phase 2 work that had been committed onto the feature branch during the same session (m-cli PR #13 had docs + Phase 1b doctor + Phase 2 engine; m-test-engine PR #3 had docs + Phase 1a engine-contract + Phase 2-prep bind-mount). Root cause: feature branches were created at local `main`'s tip, but `main` had received parallel commits while the session was in flight, so the new branch inherited them. The dirty working tree blocked the planned post-creation reset to the docs-only commit. | 0 | m-cli: PR #13 closed; engine + Phase 1b preserved on `engine-phase2`; clean docs-only PR #14 opened and merged; `engine-phase2` later rebased onto post-merge `main` with the dedup working as designed. m-test-engine: PR #3 had already merged before discovery; tree-SHA verification confirmed `origin/main` is byte-identical to the redundant preservation branches, which were then deleted. **Lesson for future passes**: before pushing a feature branch, run `git log <branch> ^origin/main --oneline` and confirm the listed commits match the scope implied by the branch name and the PR title. Catch the mismatch *before* the PR is opened, not after merge. |
