@@ -1,12 +1,14 @@
 ---
 created: 2026-05-11
 last_modified: 2026-05-11
-revisions: 0
-doc_type: [PROPOSAL, DESIGN, PLAN]
+revisions: 2
+doc_type: [SPEC, DESIGN, PLAN]
 lifecycle: active
 owner: rmrich5
 status: accepted
 accepted_on: 2026-05-11
+former_doc_type: [PROPOSAL, DESIGN, PLAN]
+former_filename: README.md
 ---
 
 # Docs Discoverability — m-dev-tools

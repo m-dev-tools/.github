@@ -12,8 +12,8 @@ title: "Docs Discoverability — Phases Tracker"
 
 > Live progress tracker for the org-wide documentation standard
 > accepted on 2026-05-11. The standard itself is in
-> [`README.md`](README.md). This document tracks execution; the
-> README is the contract.
+> [`docs-discoverability-spec.md`](docs-discoverability-spec.md). This document tracks execution; the
+> spec is the contract.
 
 **Status values** — `done` · `in-progress` · `not-started` · `blocked` · `deferred`
 
@@ -28,11 +28,11 @@ one of the legal values.
 
 | Phase | Theme | Target | Status | Reference |
 |---|---|---|---|---|
-| 0 | Vocabulary, frontmatter, indexes, acceptance | 2026-05-11 | done | [§10 P0](README.md#phase-0--done-2026-05-11) |
-| 1 | Schema + warn-only CI | 2026-Q2 weeks 1–4 | not-started | [§10 P1](README.md#phase-1--schema--warn-only-ci-target-2026-q2-weeks-14) |
-| 2 | Block on new docs; first remediations | 2026-Q2 weeks 5–8 | not-started | [§10 P2](README.md#phase-2--block-on-new-docs-target-2026-q2-weeks-58) |
-| 3 | Block everywhere; org catalog | 2026-Q3 | not-started | [§10 P3](README.md#phase-3--block-everywhere-org-catalog-target-2026-q3) |
-| 4 | Cross-repo + freshness | 2026-Q4 | not-started | [§10 P4](README.md#phase-4--cross-repo-and-freshness-target-2026-q4) |
+| 0 | Vocabulary, frontmatter, indexes, acceptance | 2026-05-11 | done | [§10 P0](docs-discoverability-spec.md#phase-0--done-2026-05-11) |
+| 1 | Schema + warn-only CI | 2026-Q2 weeks 1–4 | not-started | [§10 P1](docs-discoverability-spec.md#phase-1--schema--warn-only-ci-target-2026-q2-weeks-14) |
+| 2 | Block on new docs; first remediations | 2026-Q2 weeks 5–8 | not-started | [§10 P2](docs-discoverability-spec.md#phase-2--block-on-new-docs-target-2026-q2-weeks-58) |
+| 3 | Block everywhere; org catalog | 2026-Q3 | not-started | [§10 P3](docs-discoverability-spec.md#phase-3--block-everywhere-org-catalog-target-2026-q3) |
+| 4 | Cross-repo + freshness | 2026-Q4 | not-started | [§10 P4](docs-discoverability-spec.md#phase-4--cross-repo-and-freshness-target-2026-q4) |
 
 A phase flips to `in-progress` when any of its rows below leave
 `not-started`, and to `done` when every row reaches `done`.
@@ -43,10 +43,10 @@ A phase flips to `in-progress` when any of its rows below leave
 
 | ID | Item | Status | Date | Notes |
 |---|---|---|---|---|
-| P0.1 | Vocabulary established (23 types + 6 connections) | done | 2026-05-11 | Folded into README §4 |
+| P0.1 | Vocabulary established (23 types + 6 connections) | done | 2026-05-11 | Folded into spec §4 |
 | P0.2 | `docs/README.md` indexes generated in every repo | done | 2026-05-11 | 7 repos, 108 entries |
 | P0.3 | Frontmatter applied to every existing doc | done | 2026-05-11 | 108 files; script is idempotent |
-| P0.4 | Standard accepted; 7 open questions resolved | done | 2026-05-11 | README §13 captures the Q&A |
+| P0.4 | Standard accepted; 7 open questions resolved | done | 2026-05-11 | spec §13 captures the Q&A |
 | P0.5 | Phases tracker created (this file) | done | 2026-05-11 | |
 
 ---
@@ -72,7 +72,7 @@ Target: **2026-Q2 weeks 1–4**. Owner default: rmrich5 unless reassigned.
 
 ## 4. CI checks — implementation status
 
-The 18 checks defined in [README §9](README.md#9-ci-enforcement).
+The 18 checks defined in [spec §9](docs-discoverability-spec.md#9-ci-enforcement).
 Each check lands in the indicated phase.
 
 | # | Check | Phase | Status | Implementation note |
@@ -86,9 +86,9 @@ Each check lands in the indicated phase.
 | 6 | `docs/README.md` exists | 1 | not-started | Per-repo gate |
 | 7 | No orphans (every `.md` in index) | 1 | not-started | Bidirectional check |
 | 8 | No dangling refs in `README.md` | 1 | not-started | Local link resolution |
-| 9 | Filename matches doc_type | 2 | not-started | Per README §7 table |
+| 9 | Filename matches doc_type | 2 | not-started | Per spec §7 table |
 | 10 | Filename content-derived (no `and`, kebab-case) | 2 | not-started | |
-| 11 | Required H2 sections per doc_type | 2 | not-started | Per README §8 table |
+| 11 | Required H2 sections per doc_type | 2 | not-started | Per spec §8 table |
 | 12 | markdownlint clean | 2 | not-started | Standard ruleset, repo-overridable |
 | 13 | Cross-repo links valid (extend `check-links.py`) | 3 | not-started | Reuses existing weekly cron |
 | 14 | Freshness gate (`review_after` honored) | 3 | not-started | Extends `check-freshness.py` |
@@ -101,7 +101,7 @@ Each check lands in the indicated phase.
 
 ## 5. Legacy remediation backlog (Phase 2)
 
-Per [Q7 decision](README.md#q7--migration-of-m-clidocsplans): one PR for
+Per [Q7 decision](docs-discoverability-spec.md#q7--migration-of-m-clidocsplans): one PR for
 movement-only changes, then per-doc PRs for substantive splits.
 
 ### 5.1 Renames (filename ↔ doc_type mismatch)
@@ -117,7 +117,7 @@ movement-only changes, then per-doc PRs for substantive splits.
 
 ### 5.2 Moves (subdir ↔ doc_type mismatch — m-cli `docs/plans/`)
 
-Single PR per [§10 Phase 2](README.md#phase-2--block-on-new-docs-target-2026-q2-weeks-58)
+Single PR per [§10 Phase 2](docs-discoverability-spec.md#phase-2--block-on-new-docs-target-2026-q2-weeks-58)
 movement-only convention.
 
 | ID | File (currently in `m-cli/docs/plans/`) | Move to | doc_type | Status |
@@ -132,7 +132,7 @@ movement-only convention.
 
 ### 5.3 Splits (combination doc_types — per-doc PRs)
 
-Per [README §4 refactor heuristics](README.md#combinations-and-split-candidates).
+Per [spec §4 refactor heuristics](docs-discoverability-spec.md#combinations-and-split-candidates).
 
 | ID | File | Combination | Split target | Status |
 |---|---|---|---|---|
