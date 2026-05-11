@@ -1,4 +1,4 @@
-.PHONY: validate-catalog check-repo-meta phase0-smoke
+.PHONY: validate-catalog check-repo-meta phase0-smoke check-docs-prose
 
 validate-catalog:
 	python3 -m json.tool profile/tools.json >/tmp/m-dev-tools-tools-json-check
@@ -31,3 +31,22 @@ phase0-smoke:
 	else \
 		python3 profile/build/phase0-smoke.py; \
 	fi
+
+# Guardrail: docs/ holds only human-readable prose. Non-prose artifacts
+# (generated data, JSON/TSV output, copy-paste examples, scaffolding
+# templates) belong under a top-level domain-specific directory — not docs/.
+# Same target name as in tier-1 repos so a contributor moving between
+# repos finds it predictable.
+check-docs-prose:
+	@if [ ! -d docs ]; then echo "check-docs-prose: no docs/ directory ✓"; exit 0; fi; \
+	violations=$$(find docs -type f \
+	    ! -name '*.md' ! -name '*.markdown' \
+	    ! -name '*.png' ! -name '*.jpg' ! -name '*.jpeg' \
+	    ! -name '*.gif' ! -name '*.svg' ! -name '*.webp' \
+	    ! -name '.gitkeep'); \
+	if [ -n "$$violations" ]; then \
+	  echo "ERROR: non-prose files under docs/ — move to a top-level domain dir:" >&2; \
+	  echo "$$violations" >&2; \
+	  exit 1; \
+	fi; \
+	echo "check-docs-prose: docs/ is prose-only ✓"
