@@ -74,7 +74,7 @@ Phase 1 is unblocked.
 ## Next
 
 Phase 1 — org routing layer. See
-[`AI-discoverability-plan.md`](AI-discoverability-plan.md) §7 Phase 1:
+[`AI-discoverability-plan.md`](../AI-discoverability-plan.md) §7 Phase 1:
 
 - `repo.meta.schema.json` already exists (lands in this phase
   formally, but already in production from Phase 0).

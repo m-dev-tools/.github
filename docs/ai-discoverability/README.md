@@ -8,34 +8,39 @@ The framework itself lives at the repo root (`profile/tools.json`,
 `profile/task_index.json`, the schemas, the build scripts). This
 directory holds the prose that justifies it.
 
-## Read this first
+## Master doc — read this first
 
-If you're new to the framework:
+**[`AI-discoverability-architecture.md`](AI-discoverability-architecture.md)** —
+the foundational architecture document. First principles → design →
+implementation, with the three-layer diagram and the component flow.
+Reading this end-to-end gives an agent (or a human) everything needed
+to extend the framework: adding a new repo, a new MCP tool, a new
+manifest kind. Every other doc here is a deeper drill-down into one
+slice of the same architecture.
 
-1. **[`AI-discoverability-guide.md`](AI-discoverability-guide.md)** —
-   the user-facing intro. Explains what an "AI-discoverable" repo
-   looks like and what it costs an agent to consume.
-2. **[`AI-discoverability-plan.md`](AI-discoverability-plan.md)** —
-   the de-novo design plan. Three layers (repo-local facts → org
-   routing → agent operability), success criteria, the architectural
-   inversion vs. the prior hand-maintained `tools.json` approach.
-3. **[`current-state-inventory-priority.md`](current-state-inventory-priority.md)** —
-   the as-of-Phase-1 snapshot that re-ranked outstanding work by
-   downstream-dependent priority. Historical, but useful context for
-   why the phase order is what it is.
+## Companion design docs
+
+- **[`AI-discoverability-guide.md`](AI-discoverability-guide.md)** —
+  user-facing introduction. Pre-dates the master doc; useful as a
+  lighter-weight explainer for newcomers.
+- **[`AI-discoverability-plan.md`](AI-discoverability-plan.md)** —
+  the de-novo design plan. Spells out the three layers, success
+  criteria, and the architectural inversion vs. the prior
+  hand-maintained `tools.json` approach. The architecture doc cites
+  this as the canonical reference for design rationale.
 
 ## Phase plans + exit evidence
 
-Five phases, two docs each — the plan and the evidence file that
-captures clean-run output for the phase's exit gate.
+All under [`phases/`](phases/). One plan + one evidence file per phase,
+both committed at landing time.
 
 | Phase | Plan | Exit evidence | State |
 |---|---|---|---|
-| 0 — Repo-local manifests + CI drift gates | [`phase0-plan.md`](phase0-plan.md) | [`phase0-status.md`](phase0-status.md) | Closed 2026-05-10 |
-| 1 — Org routing layer (`tools.json` as build output) | [`phase1-plan.md`](phase1-plan.md) | [`phase1-evidence.md`](phase1-evidence.md) | Closed 2026-05-10 |
+| 0 — Repo-local manifests + CI drift gates | [`phases/phase0-plan.md`](phases/phase0-plan.md) | [`phases/phase0-status.md`](phases/phase0-status.md) | Closed 2026-05-10 |
+| 1 — Org routing layer (`tools.json` as build output) | [`phases/phase1-plan.md`](phases/phase1-plan.md) | [`phases/phase1-evidence.md`](phases/phase1-evidence.md) | Closed 2026-05-10 |
 | 2 — Tier-2 + tier-3 onboarding | (folded into Phase 1) | — | Closed 2026-05-10 |
-| 3 — Recipes + discovery handshake | [`phase3-plan.md`](phase3-plan.md) | [`phase3-evidence.md`](phase3-evidence.md) | Closed 2026-05-11 |
-| 4 — MCP server (`m-dev-tools-mcp`) | [`phase4-plan.md`](phase4-plan.md) | [`phase4-evidence.md`](phase4-evidence.md) | Closed 2026-05-11 |
+| 3 — Recipes + discovery handshake | [`phases/phase3-plan.md`](phases/phase3-plan.md) | [`phases/phase3-evidence.md`](phases/phase3-evidence.md) | Closed 2026-05-11 |
+| 4 — MCP server (`m-dev-tools-mcp`) | [`phases/phase4-plan.md`](phases/phase4-plan.md) | [`phases/phase4-evidence.md`](phases/phase4-evidence.md) | Closed 2026-05-11 |
 
 Phase 0 used a different naming convention (`-status.md` instead of
 `-evidence.md`). The convention stabilized starting Phase 1 — both

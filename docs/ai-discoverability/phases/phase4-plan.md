@@ -1,9 +1,9 @@
 # Phase 4 Implementation Plan — `m-dev-tools-mcp` MCP server
 
-**Parent plan:** [`AI-discoverability-plan.md`](AI-discoverability-plan.md) §7
+**Parent plan:** [`AI-discoverability-plan.md`](../AI-discoverability-plan.md) §7
 **Phase 4 goal:** Ship `m-dev-tools-mcp` — a thin MCP server that wraps the
 org catalog as a first-class protocol surface — as a GitHub-Release wheel
-(not PyPI; see [parent plan §5.3](AI-discoverability-plan.md#53-mcp-server)
+(not PyPI; see [parent plan §5.3](../AI-discoverability-plan.md#53-mcp-server)
 for the deferral rationale). At least one MCP client (Claude Code) is
 demonstrated end-to-end answering `route_intent("parse JSON in M")` with
 `module:m-stdlib#STDJSON`.

@@ -1,6 +1,6 @@
 # Phase 0 Implementation Plan — Tier-1 Per-Repo Contract
 
-**Parent plan:** [`AI-discoverability-plan.md`](AI-discoverability-plan.md)
+**Parent plan:** [`AI-discoverability-plan.md`](../AI-discoverability-plan.md)
 **Phase 0 goal:** `m-cli`, `m-stdlib`, and `m-standard` each emit a validated
 `dist/repo.meta.json`, ship an `AGENTS.md` with `CLAUDE.md` symlinked, and have
 a working `make check-manifest` drift gate. The meta-repo ships the
