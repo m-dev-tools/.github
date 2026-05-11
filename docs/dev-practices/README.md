@@ -103,6 +103,12 @@ need concurrent sessions on the same repo.
 - **[`parallel-multi-repo-git-hygiene.md`](parallel-multi-repo-git-hygiene.md)**
   — full rules with rationale, three-tier model, filesystem
   shared-state inventory, guardrails, diagnostic recipes.
+- **[`cli-ux-conventions-guide.md`](cli-ux-conventions-guide.md)**
+  — canonical CLI ergonomics for every tool in the org: bare-invocation
+  behavior at root and at every subcommand depth, `--help` and exit-code
+  conventions, dispatcher-vs-leaf taxonomy, anti-patterns, Python
+  argparse implementation pattern. Survey of `git` / `gh` / `kubectl` /
+  `docker` / POSIX / GNU / clig.dev.
 
 ---
 
