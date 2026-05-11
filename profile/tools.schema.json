@@ -1,26 +1,35 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/m-dev-tools/.github/blob/main/profile/tools.schema.json",
+  "$id": "https://raw.githubusercontent.com/m-dev-tools/.github/main/profile/tools.schema.json",
   "title": "m-dev-tools org catalog",
-  "description": "Validation contract for .github/profile/tools.json, the AI-readable catalog for the m-dev-tools organization.",
+  "description": "Validation contract for .github/profile/tools.json — the routing layer of the AI-discoverability stack. Summary-only: per-tool entries carry repo / role / license / agent_instructions / verified_on plus pointer URLs (*_url) into each repo's exposes.* payloads. Inlined facts (subcommands, modules, lint-rule lists) are forbidden — they live in the source repo's dist/repo.meta.json and the catalog points at them by URL. Intent routing lives in task_index.json (see task_index.schema.json), merged at catalog-build time. Both files use the same typedID grammar in $defs.",
   "type": "object",
+  "additionalProperties": false,
   "required": [
+    "$schema",
+    "schema_compat",
     "schema_version",
     "kind",
     "description",
     "org",
     "tools",
-    "task_index",
     "workflow",
     "discovery_protocol"
   ],
   "properties": {
     "$schema": {
-      "type": "string"
+      "type": "string",
+      "format": "uri"
+    },
+    "schema_compat": {
+      "description": "Compatibility integer. Only bumps on non-additive (breaking) schema changes. Every bump must add a row to profile/schema-changelog.md.",
+      "type": "integer",
+      "minimum": 1
     },
     "schema_version": {
+      "description": "Display version (semver-style). Bumped on every schema change; schema_compat only on breaking ones.",
       "type": "string",
-      "pattern": "^[0-9]+$"
+      "pattern": "^[0-9]+\\.[0-9]+(\\.[0-9]+)?$"
     },
     "kind": {
       "const": "m-dev-tools.org-catalog"
@@ -37,12 +46,10 @@
       "minProperties": 1,
       "additionalProperties": {
         "$ref": "#/$defs/tool"
+      },
+      "propertyNames": {
+        "pattern": "^[a-z0-9_-]+$"
       }
-    },
-    "task_index": {
-      "type": "object",
-      "minProperties": 1,
-      "additionalProperties": true
     },
     "workflow": {
       "type": "object",
@@ -52,23 +59,30 @@
       }
     },
     "discovery_protocol": {
-      "type": "object",
-      "minProperties": 1,
-      "additionalProperties": {
-        "anyOf": [
-          { "type": "string" },
-          {
-            "type": "array",
-            "items": { "type": "string" }
-          }
-        ]
-      }
+      "$ref": "#/$defs/discoveryProtocol"
     }
   },
-  "additionalProperties": true,
   "$defs": {
+    "typedID": {
+      "description": "Typed catalog identifier. Grammar: <kind>:<repo-or-name>(#<member>)?. Kinds: tool (a repo), cmd (CLI subcommand), module (library module), rule (lint/fmt rule), doc (a documentation surface), data (a data table), workflow (a procedural recipe), task (an intent leaf), recipe (a worked example).",
+      "type": "string",
+      "pattern": "^(tool|cmd|module|rule|doc|data|workflow|task|recipe):[a-z0-9_-]+(#[A-Za-z0-9._-]+)?$"
+    },
+    "typedIDList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/typedID"
+      }
+    },
+    "stringList": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "org": {
       "type": "object",
+      "additionalProperties": false,
       "required": ["name", "url", "tagline"],
       "properties": {
         "name": {
@@ -84,23 +98,34 @@
           "minLength": 1
         },
         "license_default": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "license_exceptions": {
           "type": "object",
-          "additionalProperties": { "type": "string" }
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "first_principles": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         }
-      },
-      "additionalProperties": true
+      }
     },
     "tool": {
+      "description": "Per-repo catalog entry. Summary-only: declarations (id/repo/role/license/agent_instructions/verified_on) plus pointer URLs (*_url) into each repo's exposes.* payloads. No inlined facts (no subcommand lists, no module dictionaries, no rule arrays). Phase 1 Track B's build-catalog.py populates *_url + *_count fields automatically from each repo's dist/repo.meta.json.",
       "type": "object",
-      "required": ["repo", "role"],
+      "additionalProperties": false,
+      "required": ["id", "repo", "role", "license", "agent_instructions", "verified_on"],
       "properties": {
+        "id": {
+          "$ref": "#/$defs/typedID",
+          "description": "Self-id for cross-reference. Must start with `tool:` for entries in this map."
+        },
         "repo": {
           "type": "string",
           "format": "uri"
@@ -109,46 +134,59 @@
           "type": "string",
           "minLength": 1
         },
-        "status": {
-          "type": "string"
-        },
         "language": {
-          "type": "string"
+          "oneOf": [
+            { "type": "string", "minLength": 1 },
+            { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 }
+          ]
         },
         "license": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
-        "entry_point": {
-          "type": "object",
-          "additionalProperties": true
+        "agent_instructions": {
+          "type": "string",
+          "description": "URL or repo-relative path to the canonical agent-instructions file (AGENTS.md)."
+        },
+        "verified_on": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "archived", "deprecated"]
+        },
+        "repo_meta_url": {
+          "type": "string",
+          "format": "uri"
         },
         "consumes": {
-          "$ref": "#/$defs/stringList"
+          "$ref": "#/$defs/typedIDList"
         },
         "consumed_by": {
-          "$ref": "#/$defs/stringList"
+          "$ref": "#/$defs/typedIDList"
         },
-        "docs": {
-          "type": "object",
-          "additionalProperties": { "type": "string" }
-        },
-        "subcommands": {
-          "type": "object",
-          "additionalProperties": true
-        },
-        "machine_readable": {
-          "type": "object",
-          "additionalProperties": true
-        },
-        "modules": {
-          "type": "object",
-          "additionalProperties": true
+        "notes": {
+          "type": "string",
+          "description": "Free-text notes. Not consumed by the catalog generator or smoke test."
         }
       },
-      "additionalProperties": true
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*_url$": {
+          "description": "Pointer URL into the source repo's dist/repo.meta.json.exposes.* payload (raw.githubusercontent.com or equivalent).",
+          "type": "string",
+          "format": "uri"
+        },
+        "^[a-z][a-z0-9_]*_count$": {
+          "description": "Summary count surfaced from the pointed-at payload (module count, command count, etc.).",
+          "type": "integer",
+          "minimum": 0
+        }
+      }
     },
     "workflow": {
       "type": "object",
+      "additionalProperties": false,
       "required": ["description", "steps"],
       "properties": {
         "description": {
@@ -159,42 +197,65 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "type": "object",
-            "required": ["n", "action"],
-            "properties": {
-              "n": {
-                "type": "integer",
-                "minimum": 1
-              },
-              "phase": {
-                "type": "string"
-              },
-              "action": {
-                "type": "string",
-                "minLength": 1
-              },
-              "command": {
-                "type": "string"
-              },
-              "tool": {
-                "type": "string"
-              },
-              "tools": {
-                "$ref": "#/$defs/stringList"
-              },
-              "see_also": {
-                "$ref": "#/$defs/stringList"
-              }
-            },
-            "additionalProperties": true
+            "$ref": "#/$defs/workflowStep"
           }
         }
-      },
-      "additionalProperties": true
+      }
     },
-    "stringList": {
-      "type": "array",
-      "items": { "type": "string" }
+    "workflowStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["n", "action"],
+      "properties": {
+        "n": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "phase": {
+          "type": "string"
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "command": {
+          "type": "string"
+        },
+        "tool": {
+          "$ref": "#/$defs/typedID"
+        },
+        "tools": {
+          "$ref": "#/$defs/typedIDList"
+        },
+        "example": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "config": {
+          "type": "string"
+        },
+        "see_also": {
+          "$ref": "#/$defs/typedIDList"
+        }
+      },
+      "anyOf": [
+        { "required": ["command"] },
+        { "required": ["tool"] },
+        { "required": ["tools"] },
+        { "required": ["example"] }
+      ]
+    },
+    "discoveryProtocol": {
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          { "type": "string", "minLength": 1 },
+          { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 }
+        ]
+      },
+      "minProperties": 1
     }
   }
 }
