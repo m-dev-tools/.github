@@ -159,6 +159,31 @@ For cross-repo or org-level discussion, file at
 - **TypeScript / Node**: per-repo (mostly Biome).
 - **No mocks unless unavoidable** — prefer real fixtures and fakes.
 
+## Layout conventions
+
+Each repo in the org follows a uniform top-level layout. The rule that
+matters across all of them:
+
+**`docs/` holds only human-readable prose** (`.md`, `.markdown`, images,
+`.gitkeep`). Technical artifacts — generated data, output, metadata,
+copy-paste examples, scaffolding templates — live elsewhere:
+
+| Path | Contents | Where it applies |
+|---|---|---|
+| `docs/` | Prose: specs, guides, ADRs, plans, build logs | every repo |
+| `dist/` | Published machine-readable contract files (Phase 0 `repo.meta.json` + the `exposes.*` payloads it references) | tier-1 repos (`m-cli`, `m-stdlib`, `m-standard`) |
+| `examples/` | Worked-example artifacts (demo source, copy-paste config presets) | `m-cli`, `m-stdlib` |
+| `templates/` | Project scaffolds | `m-stdlib` |
+| `scripts/` | Shell helpers (seed/unseed, bench drivers) | `m-cli`, `m-stdlib` |
+| `tools/` | Generator scripts (manifest, skill, doctests, validators) | tier-1 generally |
+| Domain-specific top-level dirs (e.g. `integrated/`, `per-source/`, `schemas/`, `sources/`, `mappings/` in `m-standard`) | Pipeline layers, source replicas, schemas | repo-specific |
+
+The rule is enforced per-repo by `make check-docs-prose` (CI gate).
+Anything non-prose landing under `docs/` fails the build with a pointer
+to the right directory above. Each tier-1 repo's `AGENTS.md` carries a
+"Layout conventions" section that specializes this table for its own
+top-level layout.
+
 ## Licensing
 
 Most repos are **AGPL-3.0** (`tree-sitter-m`, `m-standard`,
