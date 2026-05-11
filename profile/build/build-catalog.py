@@ -61,7 +61,7 @@ assert _spec and _spec.loader
 _spec.loader.exec_module(_validate_repo_meta)
 
 
-# ----- the canonical TIER_1 + TIER_2 list (six onboarded repos) -------------
+# ----- the canonical TIER_1 + TIER_2 + TIER_3 list (nine onboarded repos) ---
 
 TIER_1 = [
     "https://raw.githubusercontent.com/m-dev-tools/m-cli/main/dist/repo.meta.json",
@@ -73,6 +73,12 @@ TIER_2 = [
     "https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m/main/dist/repo.meta.json",
     "https://raw.githubusercontent.com/m-dev-tools/m-test-engine/main/dist/repo.meta.json",
     "https://raw.githubusercontent.com/m-dev-tools/m-modern-corpus/main/dist/repo.meta.json",
+]
+
+TIER_3 = [
+    "https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m-vscode/main/dist/repo.meta.json",
+    "https://raw.githubusercontent.com/m-dev-tools/m-stdlib-vscode/main/dist/repo.meta.json",
+    "https://raw.githubusercontent.com/m-dev-tools/m-cli-extras/main/dist/repo.meta.json",
 ]
 
 # Top-level keys we copy from the prior tools.json verbatim. These hold
@@ -295,7 +301,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--urls",
         nargs="+",
-        help="Override the TIER_1 + TIER_2 URL list.",
+        help="Override the TIER_1 + TIER_2 + TIER_3 URL list.",
     )
     args = parser.parse_args(argv)
 
@@ -310,7 +316,7 @@ def main(argv: list[str] | None = None) -> int:
     elif args.urls:
         urls = list(args.urls)
     else:
-        urls = TIER_1 + TIER_2
+        urls = TIER_1 + TIER_2 + TIER_3
 
     try:
         catalog = build(urls, network_fetcher, prior_tools)
