@@ -486,15 +486,16 @@ same Phase-0 contract, applied to six more repos.
   — the MCP server repo. v0.1.0 wheel attached to the
   [v0.1.0 release](https://github.com/m-dev-tools/m-dev-tools-mcp/releases/tag/v0.1.0).
 
-### Phase 5 — in flight
+### Phase 5 — closed 2026-05-11
 
-Continuous enforcement hardening. Plan landed 2026-05-11 at
-[`phases/phase5-plan.md`](phases/phase5-plan.md). Five tracks
-(A freshness, B link-check, C license-reconcile, D schema-compat,
-E close-out evidence) — each ships one new `profile/build/check-*.py`
-gate, one Make target, and one CI step. Tracks A through D are
-independent; can ship in any order or in parallel.
+Continuous enforcement hardening. Plan at
+[`phases/phase5-plan.md`](phases/phase5-plan.md), exit evidence at
+[`phases/phase5-evidence.md`](phases/phase5-evidence.md). All five
+tracks landed (A freshness, B link-check + B0 binary-URL fix, C
+license-reconcile, D schema-version policing, E this close-out).
+Every architectural promise in the framework now has an automated
+watchdog; human discipline is no longer the load-bearing path.
 
-Phase 5 is the operational-loop close: once it lands, every
-architectural promise in the framework has an automated watchdog and
-human discipline stops being the load-bearing path.
+The operational loop is complete. Future phases — if any — address
+*growth* scenarios (more repos, more tools, more catalog kinds)
+rather than enforcement coverage.
