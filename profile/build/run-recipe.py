@@ -41,8 +41,6 @@ import sys
 import tempfile
 from pathlib import Path
 
-import yaml
-
 PROFILE = Path(__file__).resolve().parents[1]
 RECIPE_SCHEMA_PATH = PROFILE / "recipe.schema.json"
 
@@ -67,6 +65,97 @@ EXPECTED_HEADER_RE = re.compile(r"(?m)^##\s+Expected output\s*$")
 MUST_CONTAIN_RE = re.compile(r"must contain:\s*(.+?)\s*\.?\s*$", re.IGNORECASE | re.MULTILINE)
 
 
+def _coerce_scalar(s: str) -> str | bool | int | float:
+    """Coerce a YAML-shaped scalar.
+
+    Supported: booleans (true/false/yes/no, case-insensitive), ints,
+    floats, quoted strings, bare strings. Dates are left as strings —
+    the recipe-schema's ``verified_on`` field is a string pattern, and
+    keeping them as strings sidesteps PyYAML's datetime auto-conversion.
+    """
+    s = s.strip()
+    if not s:
+        return ""
+    # Quoted string?
+    if (s.startswith('"') and s.endswith('"')) or (s.startswith("'") and s.endswith("'")):
+        return s[1:-1]
+    # Booleans.
+    low = s.lower()
+    if low in ("true", "yes"):
+        return True
+    if low in ("false", "no"):
+        return False
+    # Numbers.
+    if re.fullmatch(r"-?\d+", s):
+        try:
+            return int(s)
+        except ValueError:
+            pass
+    if re.fullmatch(r"-?\d+\.\d+", s):
+        try:
+            return float(s)
+        except ValueError:
+            pass
+    return s
+
+
+def _parse_minimal_yaml(text: str) -> dict:
+    """Parse the narrow YAML subset recipe frontmatter uses.
+
+    Supports:
+      ``key: value``
+      ``key:`` followed by ``- value`` lines (a list)
+      ``# comments`` and blank lines
+
+    Nothing else — no nested mappings, no flow style. The recipe-schema
+    contract is intentionally simple, so this 30-line parser handles
+    everything frontmatter throws at it without pulling pyyaml into the
+    CI dependency closure.
+    """
+    out: dict = {}
+    current_key: str | None = None
+    current_list: list | None = None
+    for raw_line in text.splitlines():
+        # Strip trailing whitespace + comments. Don't strip leading — we
+        # need indentation for list items.
+        line = raw_line.rstrip()
+        if not line or line.lstrip().startswith("#"):
+            continue
+        # Indented list item: "  - foo"
+        stripped = line.lstrip()
+        if stripped.startswith("- ") or stripped == "-":
+            if current_list is None:
+                raise ValueError(f"unexpected list item without preceding key: {raw_line!r}")
+            value = stripped[1:].strip()
+            if value:
+                current_list.append(_coerce_scalar(value))
+            continue
+        # Top-level "key: value" or "key:".
+        if line[0] in " \t":
+            # Indented but not a list item — unsupported.
+            raise ValueError(f"unexpected indented line: {raw_line!r}")
+        if ":" not in line:
+            raise ValueError(f"expected `key: value` or `key:`, got: {raw_line!r}")
+        key, _, value = line.partition(":")
+        key = key.strip()
+        value = value.strip()
+        # Inline comment? Strip everything from " #" onward (but only
+        # outside quoted strings — the recipe contract never quotes
+        # `#` so this conservative strip suffices).
+        if value and " #" in value and not (value.startswith('"') or value.startswith("'")):
+            value = value.split(" #", 1)[0].rstrip()
+        if value == "":
+            # Open list: subsequent "- " lines populate it.
+            current_list = []
+            out[key] = current_list
+            current_key = key
+        else:
+            out[key] = _coerce_scalar(value)
+            current_list = None
+            current_key = key
+    return out
+
+
 def split_frontmatter(text: str) -> tuple[dict, str]:
     """Return (frontmatter_dict, body). Raises ValueError on failure."""
     m = FRONTMATTER_RE.match(text)
@@ -75,18 +164,11 @@ def split_frontmatter(text: str) -> tuple[dict, str]:
     fm_text = m.group(1)
     body = m.group(2)
     try:
-        fm = yaml.safe_load(fm_text)
-    except yaml.YAMLError as exc:
+        fm = _parse_minimal_yaml(fm_text)
+    except ValueError as exc:
         raise ValueError(f"YAML parse error in frontmatter: {exc}") from exc
     if not isinstance(fm, dict):
         raise ValueError(f"frontmatter is not a mapping: got {type(fm).__name__}")
-    # PyYAML eagerly parses ISO dates as datetime.date; the schema wants
-    # strings. Normalize back to ISO-8601 strings so jsonschema's `pattern`
-    # check passes.
-    import datetime as _dt
-    for k, v in list(fm.items()):
-        if isinstance(v, (_dt.date, _dt.datetime)):
-            fm[k] = v.isoformat()[:10] if isinstance(v, _dt.date) else v.isoformat()
     return fm, body
 
 
