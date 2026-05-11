@@ -280,3 +280,83 @@ def test_invalid_manifest_raises(fetcher):
         _build_catalog.build([URL_MIN], fetcher_bad, PRIOR_TOOLS)
     # The error message should name the offending URL or the missing key
     assert "min-tool" in str(exc.value) or "repo" in str(exc.value).lower(), exc.value
+
+
+# --------------------------------------------- P1-D enhancements (inverse + archived)
+
+
+def test_consumed_by_computed_from_forward_consumes(fetcher):
+    """RICH_META declares consumes=['tool:min-tool']. build() should emit
+    `consumed_by: ['tool:rich-tool']` on min-tool's entry."""
+    out = _build_catalog.build([URL_MIN, URL_RICH], fetcher, PRIOR_TOOLS)
+    assert "consumed_by" in out["tools"]["min-tool"]
+    assert out["tools"]["min-tool"]["consumed_by"] == ["tool:rich-tool"]
+    # rich-tool has no consumer in the fixture set; should NOT have consumed_by.
+    assert "consumed_by" not in out["tools"]["rich-tool"]
+
+
+def test_consumed_by_is_sorted_and_deduplicated(fetcher):
+    """When multiple consumers reference the same producer, consumed_by
+    is sorted and deduplicated."""
+    # Inject a second consumer of min-tool by mutating EXTRA_META in the fetcher.
+    fetcher_aug = dict(fetcher)
+    extra_with_consumes = dict(EXTRA_META)
+    extra_with_consumes["consumes"] = ["tool:min-tool"]
+    fetcher_aug[URL_EXTRA] = json.dumps(extra_with_consumes)
+    out = _build_catalog.build([URL_MIN, URL_RICH, URL_EXTRA], fetcher_aug, PRIOR_TOOLS)
+    consumers = out["tools"]["min-tool"]["consumed_by"]
+    assert consumers == sorted(consumers), f"not sorted: {consumers}"
+    assert len(consumers) == len(set(consumers)), f"duplicates: {consumers}"
+    assert set(consumers) == {"tool:rich-tool", "tool:extra-tool"}
+
+
+def test_archived_entries_carried_from_prior(fetcher):
+    """Repos with `status: 'archived'` in the prior tools.json should be
+    carried verbatim into the regenerated output — they don't ship a
+    manifest by design (e.g. m-tools)."""
+    prior = json.loads(json.dumps(PRIOR_TOOLS))  # deep copy
+    prior["tools"] = {
+        "archived-thing": {
+            "id": "tool:archived-thing",
+            "repo": "https://github.com/m-dev-tools/archived-thing",
+            "role": "ARCHIVED — historical reference",
+            "language": "markdown",
+            "license": "AGPL-3.0",
+            "agent_instructions": "https://github.com/m-dev-tools/archived-thing/blob/main/README.md",
+            "verified_on": "2026-05-10",
+            "status": "archived",
+            "notes": "Carried over from prior.",
+        }
+    }
+    out = _build_catalog.build([URL_MIN], fetcher, prior)
+    assert "archived-thing" in out["tools"], (
+        "archived entry from prior tools.json was lost; "
+        f"got: {sorted(out['tools'].keys())}"
+    )
+    archived = out["tools"]["archived-thing"]
+    assert archived["status"] == "archived"
+    assert archived["id"] == "tool:archived-thing"
+
+
+def test_non_archived_prior_entries_not_carried(fetcher):
+    """Only `status: 'archived'` survives the prior-tools merge. A prior
+    `status: 'active'` entry whose manifest is gone should NOT come back
+    via this codepath — that'd hide real onboarding regressions."""
+    prior = json.loads(json.dumps(PRIOR_TOOLS))
+    prior["tools"] = {
+        "active-thing": {
+            "id": "tool:active-thing",
+            "repo": "https://github.com/m-dev-tools/active-thing",
+            "role": "Should NOT be carried — no manifest fetched.",
+            "language": "python",
+            "license": "AGPL-3.0",
+            "agent_instructions": "https://...",
+            "verified_on": "2026-05-10",
+            "status": "active",
+        }
+    }
+    out = _build_catalog.build([URL_MIN], fetcher, prior)
+    assert "active-thing" not in out["tools"], (
+        "active-status prior entry was silently carried; would hide a "
+        "missing manifest. Only archived entries should carry over."
+    )

@@ -1,216 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/m-dev-tools/.github/main/profile/tools.schema.json",
-  "schema_compat": 1,
-  "schema_version": "1.0",
-  "kind": "m-dev-tools.org-catalog",
   "description": "Machine-readable catalog for the m-dev-tools GitHub organization. Summary-only: each tools.* entry carries identification + pointer URLs into the source repo's dist/repo.meta.json.exposes.* payloads. Intent routing lives in profile/task_index.json (Phase-1 Track B's build-catalog.py merges them at build time). No inlined facts (no subcommand lists, no module dictionaries, no rule arrays) — those drift; the pointer URLs don't.",
-
-  "org": {
-    "name": "m-dev-tools",
-    "url": "https://github.com/m-dev-tools",
-    "tagline": "Engine-neutral M (MUMPS) developer tools — TDD + CI/CD stack for InterSystems IRIS and YottaDB.",
-    "license_default": "AGPL-3.0",
-    "license_exceptions": {
-      "m-stdlib-vscode": "MIT",
-      "m-modern-corpus": "LicenseRef-mixed-per-subdir (per-subdirectory upstream licenses)"
-    },
-    "first_principles": [
-      "m-stdlib has architectural priority over m-cli — when both projects need a utility, it lands in m-stdlib first.",
-      "Source-level tools (m fmt, m lint) are engine-neutral; runtime tools (m test, m coverage) are YottaDB-targeted.",
-      "Every module ships with a vendored conformance corpus tied to the relevant RFC or NIST publication.",
-      "m-cli's CLI ergonomics deliberately mirror Go (`go fmt`/`test`/`vet`) and Rust (`cargo fmt`/`test`/`clippy`) — see m-tools/docs/m-tool-gap-analysis.md for the gap analysis that drove the design."
-    ]
-  },
-
-  "tools": {
-    "m-cli": {
-      "id": "tool:m-cli",
-      "repo": "https://github.com/m-dev-tools/m-cli",
-      "role": "Canonical CLI toolchain — m fmt / lint / test / coverage / watch / lsp / doc / new / ...",
-      "language": "python",
-      "license": "AGPL-3.0",
-      "agent_instructions": "https://github.com/m-dev-tools/m-cli/blob/main/AGENTS.md",
-      "verified_on": "2026-05-10",
-      "status": "active",
-      "repo_meta_url": "https://raw.githubusercontent.com/m-dev-tools/m-cli/main/dist/repo.meta.json",
-      "commands_url":   "https://raw.githubusercontent.com/m-dev-tools/m-cli/main/dist/commands.json",
-      "lint_rules_url": "https://raw.githubusercontent.com/m-dev-tools/m-cli/main/dist/lint-rules.json",
-      "fmt_rules_url":  "https://raw.githubusercontent.com/m-dev-tools/m-cli/main/dist/fmt-rules.json",
-      "consumes": ["tool:tree-sitter-m", "tool:m-standard", "tool:m-test-engine"],
-      "consumed_by": ["tool:tree-sitter-m-vscode"]
-    },
-
-    "m-cli-extras": {
-      "id": "tool:m-cli-extras",
-      "repo": "https://github.com/m-dev-tools/m-cli-extras",
-      "role": "Out-of-tree m-cli plugins — niche subcommands registered via the m_cli.plugins entry-point group",
-      "language": "python",
-      "license": "AGPL-3.0",
-      "agent_instructions": "https://github.com/m-dev-tools/m-cli-extras/blob/main/AGENTS.md",
-      "verified_on": "2026-05-10",
-      "status": "active",
-      "repo_meta_url": "https://raw.githubusercontent.com/m-dev-tools/m-cli-extras/main/dist/repo.meta.json",
-      "plugins_url":   "https://raw.githubusercontent.com/m-dev-tools/m-cli-extras/main/dist/plugins.json",
-      "consumes": ["tool:m-cli"]
-    },
-
-    "m-stdlib": {
-      "id": "tool:m-stdlib",
-      "repo": "https://github.com/m-dev-tools/m-stdlib",
-      "role": "Pure-M (and selectively $ZF-bound) runtime standard library — STD* modules",
-      "language": "m",
-      "license": "AGPL-3.0",
-      "agent_instructions": "https://github.com/m-dev-tools/m-stdlib/blob/main/AGENTS.md",
-      "verified_on": "2026-05-10",
-      "status": "active",
-      "repo_meta_url":   "https://raw.githubusercontent.com/m-dev-tools/m-stdlib/main/dist/repo.meta.json",
-      "manifest_url":    "https://raw.githubusercontent.com/m-dev-tools/m-stdlib/main/dist/stdlib-manifest.json",
-      "errors_url":      "https://raw.githubusercontent.com/m-dev-tools/m-stdlib/main/dist/errors.json",
-      "consumes": ["tool:m-test-engine"],
-      "consumed_by": ["tool:m-stdlib-vscode", "tool:m-cli"]
-    },
-
-    "m-standard": {
-      "id": "tool:m-standard",
-      "repo": "https://github.com/m-dev-tools/m-standard",
-      "role": "Citable, machine-readable M language reference reconciling AnnoStd / YottaDB / IRIS / VA SAC",
-      "language": "python",
-      "license": "AGPL-3.0",
-      "agent_instructions": "https://github.com/m-dev-tools/m-standard/blob/main/AGENTS.md",
-      "verified_on": "2026-05-10",
-      "status": "active",
-      "repo_meta_url":                  "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/dist/repo.meta.json",
-      "grammar_surface_url":            "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/grammar-surface.json",
-      "commands_url":                   "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/commands.tsv",
-      "intrinsic_functions_url":        "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/intrinsic-functions.tsv",
-      "intrinsic_special_variables_url":"https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/intrinsic-special-variables.tsv",
-      "operators_url":                  "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/operators.tsv",
-      "errors_url":                     "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/errors.tsv",
-      "pragmatic_standard_url":         "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/pragmatic-m-standard.json",
-      "operational_standard_url":       "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/operational-m-standard.json",
-      "va_sac_rules_url":               "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/va-sac-rules.tsv",
-      "consumed_by": ["tool:tree-sitter-m", "tool:m-cli"]
-    },
-
-    "tree-sitter-m": {
-      "id": "tool:tree-sitter-m",
-      "repo": "https://github.com/m-dev-tools/tree-sitter-m",
-      "role": "Tree-sitter grammar for M — generated mechanically from m-standard's grammar-surface.json",
-      "language": ["javascript", "c", "rust", "python", "go"],
-      "license": "AGPL-3.0",
-      "agent_instructions": "https://github.com/m-dev-tools/tree-sitter-m/blob/main/AGENTS.md",
-      "verified_on": "2026-05-10",
-      "status": "active",
-      "repo_meta_url":         "https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m/main/dist/repo.meta.json",
-      "node_types_url":        "https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m/main/src/node-types.json",
-      "grammar_url":           "https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m/main/src/grammar.json",
-      "grammar_metadata_url":  "https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m/main/src/grammar-metadata.json",
-      "consumes": ["tool:m-standard"],
-      "consumed_by": ["tool:m-cli", "tool:tree-sitter-m-vscode"]
-    },
-
-    "m-test-engine": {
-      "id": "tool:m-test-engine",
-      "repo": "https://github.com/m-dev-tools/m-test-engine",
-      "role": "Minimal YottaDB Docker container — lightweight default test substrate for non-VistA M development",
-      "language": "dockerfile",
-      "license": "AGPL-3.0",
-      "agent_instructions": "https://github.com/m-dev-tools/m-test-engine/blob/main/AGENTS.md",
-      "verified_on": "2026-05-10",
-      "status": "active",
-      "repo_meta_url":  "https://raw.githubusercontent.com/m-dev-tools/m-test-engine/main/dist/repo.meta.json",
-      "lifecycle_url":  "https://raw.githubusercontent.com/m-dev-tools/m-test-engine/main/dist/lifecycle.json",
-      "dockerfile_url": "https://raw.githubusercontent.com/m-dev-tools/m-test-engine/main/docker/Dockerfile",
-      "compose_url":    "https://raw.githubusercontent.com/m-dev-tools/m-test-engine/main/docker/compose.yml",
-      "consumed_by": ["tool:m-cli", "tool:m-stdlib"]
-    },
-
-    "m-modern-corpus": {
-      "id": "tool:m-modern-corpus",
-      "repo": "https://github.com/m-dev-tools/m-modern-corpus",
-      "role": "Validation corpus — modern non-VistA M source from active open-source projects",
-      "language": "m",
-      "license": "LicenseRef-mixed-per-subdir",
-      "agent_instructions": "https://github.com/m-dev-tools/m-modern-corpus/blob/main/AGENTS.md",
-      "verified_on": "2026-05-10",
-      "status": "active",
-      "repo_meta_url": "https://raw.githubusercontent.com/m-dev-tools/m-modern-corpus/main/dist/repo.meta.json",
-      "manifest_url":  "https://raw.githubusercontent.com/m-dev-tools/m-modern-corpus/main/dist/manifest.json",
-      "stats_url":     "https://raw.githubusercontent.com/m-dev-tools/m-modern-corpus/main/dist/stats.json",
-      "consumed_by": ["tool:tree-sitter-m", "tool:m-cli"]
-    },
-
-    "tree-sitter-m-vscode": {
-      "id": "tool:tree-sitter-m-vscode",
-      "repo": "https://github.com/m-dev-tools/tree-sitter-m-vscode",
-      "role": "VS Code extension — syntax highlighting via tree-sitter-m WASM + LSP client (spawns `m lsp` from m-cli)",
-      "language": "typescript",
-      "license": "MIT",
-      "agent_instructions": "https://github.com/m-dev-tools/tree-sitter-m-vscode/blob/main/AGENTS.md",
-      "verified_on": "2026-05-10",
-      "status": "active",
-      "repo_meta_url":             "https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m-vscode/main/dist/repo.meta.json",
-      "extension_info_url":        "https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m-vscode/main/dist/extension-info.json",
-      "package_json_url":          "https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m-vscode/main/package.json",
-      "language_configuration_url":"https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m-vscode/main/language-configuration.json",
-      "consumes": ["tool:tree-sitter-m", "tool:m-cli"]
-    },
-
-    "m-stdlib-vscode": {
-      "id": "tool:m-stdlib-vscode",
-      "repo": "https://github.com/m-dev-tools/m-stdlib-vscode",
-      "role": "VS Code extension — manifest-driven hover / goto-def / completion for STD* symbols in .m files",
-      "language": "typescript",
-      "license": "MIT",
-      "agent_instructions": "https://github.com/m-dev-tools/m-stdlib-vscode/blob/main/AGENTS.md",
-      "verified_on": "2026-05-10",
-      "status": "active",
-      "repo_meta_url":      "https://raw.githubusercontent.com/m-dev-tools/m-stdlib-vscode/main/dist/repo.meta.json",
-      "extension_info_url": "https://raw.githubusercontent.com/m-dev-tools/m-stdlib-vscode/main/dist/extension-info.json",
-      "package_json_url":   "https://raw.githubusercontent.com/m-dev-tools/m-stdlib-vscode/main/package.json",
-      "consumes": ["tool:m-stdlib"]
-    },
-
-    "m-tools": {
-      "id": "tool:m-tools",
-      "repo": "https://github.com/m-dev-tools/m-tools",
-      "role": "ARCHIVED — historical seed of the entire org. Original gap analysis + Tier 1–4 strategy + canonical command map.",
-      "language": "markdown",
-      "license": "AGPL-3.0",
-      "agent_instructions": "https://github.com/m-dev-tools/m-tools/blob/main/README.md",
-      "verified_on": "2026-05-10",
-      "status": "archived",
-      "notes": "Read for: why the ecosystem is shaped the way it is. See m-tools/docs/m-tool-gap-analysis.md for the Go/Rust/Python comparison that drove m-cli's CLI ergonomics. preserved_docs: docs/gap-analysis-and-remediation-strategy.md, docs/m-tool-gap-analysis.md, docs/m-tooling-tier1.md, docs/implementation.md."
-    }
-  },
-
-  "workflow": {
-    "tdd_inner_loop": {
-      "description": "Canonical red → green → refactor loop using m-dev-tools. Mirrors `cargo new && cargo test && cargo clippy && cargo fmt` end to end.",
-      "steps": [
-        { "n": 1, "phase": "scaffold", "action": "Create a new M project with Makefile, .m-cli.toml, tests/, CI", "command": "m new myproj && cd myproj" },
-        { "n": 2, "phase": "engine",   "action": "Start the test engine container",                                "command": "make -C ~/m-dev-tools/m-test-engine up", "tool": "tool:m-test-engine" },
-        { "n": 3, "phase": "red",      "action": "Write a failing test in tests/MYRTNTST.m using STDASSERT",       "tools": ["module:m-stdlib#STDASSERT"], "example": "do start^STDASSERT(.pass,.fail) ... do eq^STDASSERT(.pass,.fail,$$add^myrtn(2,3),5,\"add\") ... do report^STDASSERT(pass,fail)" },
-        { "n": 4, "phase": "red",      "action": "Run — confirm RED",                                              "command": "m test" },
-        { "n": 5, "phase": "green",    "action": "Implement the routine until tests pass",                         "command": "m test" },
-        { "n": 6, "phase": "refactor", "action": "Format + lint",                                                  "command": "m fmt && m lint --error-on=error" },
-        { "n": 7, "phase": "gate",     "action": "Coverage gate (default ≥85%)",                                   "command": "m coverage --min-percent=85" },
-        { "n": 8, "phase": "watch",    "action": "Optional — leave watch running for sub-second feedback",         "command": "m watch", "note": "skip steps 4–6 manually after this; the watcher reruns affected suites on save" },
-        { "n": 9, "phase": "commit",   "action": "Pre-commit hook re-runs fmt-check + lint",                       "tool": "tool:m-cli", "config": ".pre-commit-config.yaml referencing m-cli's .pre-commit-hooks.yaml" },
-        { "n": 10, "phase": "ci",      "action": "Push — CI runs the same gates via `make ci`",                    "command": "git push", "see_also": ["cmd:m-cli#ci"] }
-      ]
-    },
-    "minimal_application_recipe": {
-      "description": "Smallest realistic project: parse a JSON HTTP response and log it. Hits STDHTTP + STDJSON + STDLOG end-to-end.",
-      "steps": [
-        { "n": 1, "action": "Scaffold",                                                                            "command": "m new fetcher && cd fetcher" },
-        { "n": 2, "action": "Write tests/FETCHTST.m with STDASSERT + STDMOCK (mock STDHTTP)",                      "tools": ["module:m-stdlib#STDASSERT", "module:m-stdlib#STDMOCK"] },
-        { "n": 3, "action": "Implement src/fetch.m using STDHTTP for the call, STDJSON for parsing, STDLOG output", "tools": ["module:m-stdlib#STDHTTP", "module:m-stdlib#STDJSON", "module:m-stdlib#STDLOG"] },
-        { "n": 4, "action": "Run",                                                                                 "command": "m test && m fmt && m lint" }
-      ]
-    }
-  },
-
   "discovery_protocol": {
     "_comment": "How an AI agent should consume this catalog when given a fresh user request.",
     "step_1_read": [
@@ -226,5 +16,320 @@
     "step_6_compose_workflow": "Use `workflow.tdd_inner_loop` for new application work: scaffold, write failing test, implement, run test, fmt, lint, coverage, CI.",
     "step_7_verify": "Run the nearest available toolchain checks (`m test`, `m fmt --check`, `m lint`, `m coverage`, `m doctor`) before declaring completion.",
     "step_8_do_not_invent": "If a requested STD* API, m-cli command, lint rule, or language token is absent from the relevant *_url payload, do not fabricate it. State the gap and route the addition to the owning repo."
+  },
+  "kind": "m-dev-tools.org-catalog",
+  "org": {
+    "first_principles": [
+      "m-stdlib has architectural priority over m-cli — when both projects need a utility, it lands in m-stdlib first.",
+      "Source-level tools (m fmt, m lint) are engine-neutral; runtime tools (m test, m coverage) are YottaDB-targeted.",
+      "Every module ships with a vendored conformance corpus tied to the relevant RFC or NIST publication.",
+      "m-cli's CLI ergonomics deliberately mirror Go (`go fmt`/`test`/`vet`) and Rust (`cargo fmt`/`test`/`clippy`) — see m-tools/docs/m-tool-gap-analysis.md for the gap analysis that drove the design."
+    ],
+    "license_default": "AGPL-3.0",
+    "license_exceptions": {
+      "m-modern-corpus": "LicenseRef-mixed-per-subdir (per-subdirectory upstream licenses)",
+      "m-stdlib-vscode": "MIT"
+    },
+    "name": "m-dev-tools",
+    "tagline": "Engine-neutral M (MUMPS) developer tools — TDD + CI/CD stack for InterSystems IRIS and YottaDB.",
+    "url": "https://github.com/m-dev-tools"
+  },
+  "schema_compat": 1,
+  "schema_version": "1.0",
+  "tools": {
+    "m-cli": {
+      "agent_instructions": "https://github.com/m-dev-tools/m-cli/blob/main/AGENTS.md",
+      "commands_url": "https://raw.githubusercontent.com/m-dev-tools/m-cli/main/dist/commands.json",
+      "consumed_by": [
+        "tool:m-cli-extras",
+        "tool:tree-sitter-m-vscode"
+      ],
+      "consumes": [
+        "tool:tree-sitter-m",
+        "tool:m-standard",
+        "tool:m-test-engine"
+      ],
+      "fmt_rules_url": "https://raw.githubusercontent.com/m-dev-tools/m-cli/main/dist/fmt-rules.json",
+      "id": "tool:m-cli",
+      "language": "python",
+      "license": "AGPL-3.0",
+      "lint_rules_url": "https://raw.githubusercontent.com/m-dev-tools/m-cli/main/dist/lint-rules.json",
+      "repo": "https://github.com/m-dev-tools/m-cli",
+      "repo_meta_url": "https://raw.githubusercontent.com/m-dev-tools/m-cli/main/dist/repo.meta.json",
+      "role": "Canonical M CLI — fmt / lint / test / coverage / watch / lsp / doc / new",
+      "status": "active",
+      "verified_on": "2026-05-10"
+    },
+    "m-cli-extras": {
+      "agent_instructions": "https://github.com/m-dev-tools/m-cli-extras/blob/main/AGENTS.md",
+      "consumes": [
+        "tool:m-cli"
+      ],
+      "id": "tool:m-cli-extras",
+      "language": "python",
+      "license": "AGPL-3.0",
+      "plugins_url": "https://raw.githubusercontent.com/m-dev-tools/m-cli-extras/main/dist/plugins.json",
+      "pyproject_toml_url": "https://raw.githubusercontent.com/m-dev-tools/m-cli-extras/main/pyproject.toml",
+      "repo": "https://github.com/m-dev-tools/m-cli-extras",
+      "repo_meta_url": "https://raw.githubusercontent.com/m-dev-tools/m-cli-extras/main/dist/repo.meta.json",
+      "role": "Out-of-tree m-cli plugins — niche subcommands registered via the m_cli.plugins entry-point group",
+      "status": "active",
+      "verified_on": "2026-05-10"
+    },
+    "m-modern-corpus": {
+      "agent_instructions": "https://github.com/m-dev-tools/m-modern-corpus/blob/main/AGENTS.md",
+      "id": "tool:m-modern-corpus",
+      "language": "m",
+      "license": "LicenseRef-mixed-per-subdir",
+      "licenses_url": "https://raw.githubusercontent.com/m-dev-tools/m-modern-corpus/main/LICENSES.md",
+      "manifest_url": "https://raw.githubusercontent.com/m-dev-tools/m-modern-corpus/main/dist/manifest.json",
+      "repo": "https://github.com/m-dev-tools/m-modern-corpus",
+      "repo_meta_url": "https://raw.githubusercontent.com/m-dev-tools/m-modern-corpus/main/dist/repo.meta.json",
+      "role": "Validation corpus — modern open-source M source for lint/parser regression testing",
+      "stats_url": "https://raw.githubusercontent.com/m-dev-tools/m-modern-corpus/main/dist/stats.json",
+      "status": "active",
+      "verified_on": "2026-05-10"
+    },
+    "m-standard": {
+      "agent_instructions": "https://github.com/m-dev-tools/m-standard/blob/main/AGENTS.md",
+      "commands_url": "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/commands.tsv",
+      "consumed_by": [
+        "tool:m-cli",
+        "tool:tree-sitter-m"
+      ],
+      "errors_url": "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/errors.tsv",
+      "grammar_surface_url": "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/grammar-surface.json",
+      "id": "tool:m-standard",
+      "intrinsic_functions_url": "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/intrinsic-functions.tsv",
+      "intrinsic_special_variables_url": "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/intrinsic-special-variables.tsv",
+      "language": "python",
+      "license": "AGPL-3.0",
+      "operational_standard_url": "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/operational-m-standard.json",
+      "operators_url": "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/operators.tsv",
+      "pragmatic_standard_url": "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/pragmatic-m-standard.json",
+      "repo": "https://github.com/m-dev-tools/m-standard",
+      "repo_meta_url": "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/dist/repo.meta.json",
+      "role": "Machine-readable M language reference",
+      "status": "active",
+      "va_sac_rules_url": "https://raw.githubusercontent.com/m-dev-tools/m-standard/main/integrated/va-sac-rules.tsv",
+      "verified_on": "2026-05-10"
+    },
+    "m-stdlib": {
+      "agent_instructions": "https://github.com/m-dev-tools/m-stdlib/blob/main/AGENTS.md",
+      "consumed_by": [
+        "tool:m-stdlib-vscode"
+      ],
+      "consumes": [
+        "tool:m-test-engine"
+      ],
+      "errors_url": "https://raw.githubusercontent.com/m-dev-tools/m-stdlib/main/dist/errors.json",
+      "id": "tool:m-stdlib",
+      "language": "m",
+      "license": "AGPL-3.0",
+      "modules_url": "https://raw.githubusercontent.com/m-dev-tools/m-stdlib/main/dist/stdlib-manifest.json",
+      "repo": "https://github.com/m-dev-tools/m-stdlib",
+      "repo_meta_url": "https://raw.githubusercontent.com/m-dev-tools/m-stdlib/main/dist/repo.meta.json",
+      "role": "Pure-M runtime standard library — STD* modules",
+      "status": "active",
+      "verified_on": "2026-05-10"
+    },
+    "m-stdlib-vscode": {
+      "agent_instructions": "https://github.com/m-dev-tools/m-stdlib-vscode/blob/main/AGENTS.md",
+      "consumes": [
+        "tool:m-stdlib"
+      ],
+      "extension_info_url": "https://raw.githubusercontent.com/m-dev-tools/m-stdlib-vscode/main/dist/extension-info.json",
+      "id": "tool:m-stdlib-vscode",
+      "language": "typescript",
+      "license": "MIT",
+      "package_json_url": "https://raw.githubusercontent.com/m-dev-tools/m-stdlib-vscode/main/package.json",
+      "repo": "https://github.com/m-dev-tools/m-stdlib-vscode",
+      "repo_meta_url": "https://raw.githubusercontent.com/m-dev-tools/m-stdlib-vscode/main/dist/repo.meta.json",
+      "role": "VS Code extension — manifest-driven hover / goto-def / completion for STD* symbols in .m files",
+      "status": "active",
+      "verified_on": "2026-05-10"
+    },
+    "m-test-engine": {
+      "agent_instructions": "https://github.com/m-dev-tools/m-test-engine/blob/main/AGENTS.md",
+      "compose_url": "https://raw.githubusercontent.com/m-dev-tools/m-test-engine/main/docker/compose.yml",
+      "consumed_by": [
+        "tool:m-cli",
+        "tool:m-stdlib"
+      ],
+      "dockerfile_url": "https://raw.githubusercontent.com/m-dev-tools/m-test-engine/main/docker/Dockerfile",
+      "id": "tool:m-test-engine",
+      "language": "dockerfile",
+      "license": "AGPL-3.0",
+      "lifecycle_url": "https://raw.githubusercontent.com/m-dev-tools/m-test-engine/main/dist/lifecycle.json",
+      "repo": "https://github.com/m-dev-tools/m-test-engine",
+      "repo_meta_url": "https://raw.githubusercontent.com/m-dev-tools/m-test-engine/main/dist/repo.meta.json",
+      "role": "Minimal YottaDB Docker container — lightweight default test substrate for m-cli + m-stdlib",
+      "status": "active",
+      "verified_on": "2026-05-10"
+    },
+    "m-tools": {
+      "agent_instructions": "https://github.com/m-dev-tools/m-tools/blob/main/README.md",
+      "id": "tool:m-tools",
+      "language": "markdown",
+      "license": "AGPL-3.0",
+      "notes": "Read for: why the ecosystem is shaped the way it is. See m-tools/docs/m-tool-gap-analysis.md for the Go/Rust/Python comparison that drove m-cli's CLI ergonomics. preserved_docs: docs/gap-analysis-and-remediation-strategy.md, docs/m-tool-gap-analysis.md, docs/m-tooling-tier1.md, docs/implementation.md.",
+      "repo": "https://github.com/m-dev-tools/m-tools",
+      "role": "ARCHIVED — historical seed of the entire org. Original gap analysis + Tier 1–4 strategy + canonical command map.",
+      "status": "archived",
+      "verified_on": "2026-05-10"
+    },
+    "tree-sitter-m": {
+      "agent_instructions": "https://github.com/m-dev-tools/tree-sitter-m/blob/main/AGENTS.md",
+      "consumed_by": [
+        "tool:m-cli",
+        "tool:tree-sitter-m-vscode"
+      ],
+      "consumes": [
+        "tool:m-standard"
+      ],
+      "grammar_metadata_url": "https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m/main/src/grammar-metadata.json",
+      "grammar_url": "https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m/main/src/grammar.json",
+      "id": "tool:tree-sitter-m",
+      "language": [
+        "javascript",
+        "c",
+        "rust",
+        "python",
+        "go"
+      ],
+      "license": "AGPL-3.0",
+      "node_types_url": "https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m/main/src/node-types.json",
+      "repo": "https://github.com/m-dev-tools/tree-sitter-m",
+      "repo_meta_url": "https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m/main/dist/repo.meta.json",
+      "role": "Tree-sitter grammar for M (MUMPS) — parser + AST node-types + grammar-metadata, generated from m-standard's grammar-surface.json",
+      "status": "active",
+      "verified_on": "2026-05-10"
+    },
+    "tree-sitter-m-vscode": {
+      "agent_instructions": "https://github.com/m-dev-tools/tree-sitter-m-vscode/blob/main/AGENTS.md",
+      "consumes": [
+        "tool:tree-sitter-m",
+        "tool:m-cli"
+      ],
+      "extension_info_url": "https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m-vscode/main/dist/extension-info.json",
+      "id": "tool:tree-sitter-m-vscode",
+      "language": "typescript",
+      "language_configuration_url": "https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m-vscode/main/language-configuration.json",
+      "license": "MIT",
+      "package_json_url": "https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m-vscode/main/package.json",
+      "repo": "https://github.com/m-dev-tools/tree-sitter-m-vscode",
+      "repo_meta_url": "https://raw.githubusercontent.com/m-dev-tools/tree-sitter-m-vscode/main/dist/repo.meta.json",
+      "role": "VS Code extension — tree-sitter-m WASM syntax highlighting + LSP client (spawns `m lsp` from m-cli)",
+      "status": "active",
+      "verified_on": "2026-05-10"
+    }
+  },
+  "workflow": {
+    "minimal_application_recipe": {
+      "description": "Smallest realistic project: parse a JSON HTTP response and log it. Hits STDHTTP + STDJSON + STDLOG end-to-end.",
+      "steps": [
+        {
+          "action": "Scaffold",
+          "command": "m new fetcher && cd fetcher",
+          "n": 1
+        },
+        {
+          "action": "Write tests/FETCHTST.m with STDASSERT + STDMOCK (mock STDHTTP)",
+          "n": 2,
+          "tools": [
+            "module:m-stdlib#STDASSERT",
+            "module:m-stdlib#STDMOCK"
+          ]
+        },
+        {
+          "action": "Implement src/fetch.m using STDHTTP for the call, STDJSON for parsing, STDLOG output",
+          "n": 3,
+          "tools": [
+            "module:m-stdlib#STDHTTP",
+            "module:m-stdlib#STDJSON",
+            "module:m-stdlib#STDLOG"
+          ]
+        },
+        {
+          "action": "Run",
+          "command": "m test && m fmt && m lint",
+          "n": 4
+        }
+      ]
+    },
+    "tdd_inner_loop": {
+      "description": "Canonical red → green → refactor loop using m-dev-tools. Mirrors `cargo new && cargo test && cargo clippy && cargo fmt` end to end.",
+      "steps": [
+        {
+          "action": "Create a new M project with Makefile, .m-cli.toml, tests/, CI",
+          "command": "m new myproj && cd myproj",
+          "n": 1,
+          "phase": "scaffold"
+        },
+        {
+          "action": "Start the test engine container",
+          "command": "make -C ~/m-dev-tools/m-test-engine up",
+          "n": 2,
+          "phase": "engine",
+          "tool": "tool:m-test-engine"
+        },
+        {
+          "action": "Write a failing test in tests/MYRTNTST.m using STDASSERT",
+          "example": "do start^STDASSERT(.pass,.fail) ... do eq^STDASSERT(.pass,.fail,$$add^myrtn(2,3),5,\"add\") ... do report^STDASSERT(pass,fail)",
+          "n": 3,
+          "phase": "red",
+          "tools": [
+            "module:m-stdlib#STDASSERT"
+          ]
+        },
+        {
+          "action": "Run — confirm RED",
+          "command": "m test",
+          "n": 4,
+          "phase": "red"
+        },
+        {
+          "action": "Implement the routine until tests pass",
+          "command": "m test",
+          "n": 5,
+          "phase": "green"
+        },
+        {
+          "action": "Format + lint",
+          "command": "m fmt && m lint --error-on=error",
+          "n": 6,
+          "phase": "refactor"
+        },
+        {
+          "action": "Coverage gate (default ≥85%)",
+          "command": "m coverage --min-percent=85",
+          "n": 7,
+          "phase": "gate"
+        },
+        {
+          "action": "Optional — leave watch running for sub-second feedback",
+          "command": "m watch",
+          "n": 8,
+          "note": "skip steps 4–6 manually after this; the watcher reruns affected suites on save",
+          "phase": "watch"
+        },
+        {
+          "action": "Pre-commit hook re-runs fmt-check + lint",
+          "config": ".pre-commit-config.yaml referencing m-cli's .pre-commit-hooks.yaml",
+          "n": 9,
+          "phase": "commit",
+          "tool": "tool:m-cli"
+        },
+        {
+          "action": "Push — CI runs the same gates via `make ci`",
+          "command": "git push",
+          "n": 10,
+          "phase": "ci",
+          "see_also": [
+            "cmd:m-cli#ci"
+          ]
+        }
+      ]
+    }
   }
 }

@@ -237,6 +237,26 @@ def translate_manifest(meta: dict, url: str) -> tuple[str, dict]:
 # -------------------------------------------------------- top-level assembly
 
 
+def _compute_consumed_by(tools: dict[str, dict]) -> dict[str, list[str]]:
+    """Build the inverse-edge map: for each consumer's `consumes` typed-ID,
+    record an entry in `consumed_by` on the producer.
+
+    Operates on the bare `tools` dict (post-translate, pre-archived-merge).
+    Returns a fresh dict keyed by producer's `tools.json` key (not typed
+    ID) → list of consumer typed-IDs, sorted for determinism.
+    """
+    inverse: dict[str, list[str]] = {}
+    for consumer_key, entry in tools.items():
+        consumer_id = entry.get("id", f"tool:{consumer_key}")
+        for consumed_id in entry.get("consumes", []):
+            # Strip the `tool:` prefix to get the producer's tools key.
+            if not consumed_id.startswith("tool:"):
+                continue
+            producer_key = consumed_id[len("tool:") :]
+            inverse.setdefault(producer_key, []).append(consumer_id)
+    return {k: sorted(set(v)) for k, v in inverse.items()}
+
+
 def build(
     urls: list[str],
     fetcher: Callable[[str], str] | dict,
@@ -246,7 +266,12 @@ def build(
 
     - Carries CARRIED_TOP_LEVEL keys from `prior_tools` verbatim.
     - Generates `tools` from `urls` via translate_manifest.
-    - Never emits `task_index` (post-P1-A contract).
+    - Carries archived entries (`status: "archived"`) from `prior_tools.tools`
+      verbatim — these repos don't ship `dist/repo.meta.json` by design
+      (m-tools is the canonical example).
+    - Computes `consumed_by` inverse-edges from the forward `consumes` graph
+      and merges them onto each producer's entry.
+    - Never emits `task_index` (post-P1-A contract — lives in task_index.json).
     """
     out: dict = {}
     for key in CARRIED_TOP_LEVEL:
@@ -261,8 +286,23 @@ def build(
         if tools_key in tools:
             raise ValueError(f"duplicate tool key {tools_key!r} (second source: {url})")
         tools[tools_key] = entry
-    out["tools"] = tools
 
+    # Carry archived entries from prior — they don't ship a manifest and
+    # must be merged in for the catalog to reflect the full org surface.
+    for prior_key, prior_entry in (prior_tools.get("tools") or {}).items():
+        if prior_key in tools:
+            continue
+        if prior_entry.get("status") == "archived":
+            tools[prior_key] = dict(prior_entry)
+
+    # Compute inverse edges from the (now-complete) forward graph and
+    # attach `consumed_by` to each producer's entry.
+    inverse = _compute_consumed_by(tools)
+    for producer_key, consumers in inverse.items():
+        if producer_key in tools:
+            tools[producer_key]["consumed_by"] = consumers
+
+    out["tools"] = tools
     return out
 
 
