@@ -21,7 +21,10 @@ editor integrations, they form an end-to-end TDD stack that works
 identically for **InterSystems IRIS** and **YottaDB** developers
 maintaining modern (pythonic) M code, as well as large legacy (VistA) M code.
 
-**AI-integrated out-of-the-box**.  m-dev-tools ships an MCP server ([`m-dev-tools-mcp`](https://pypi.org/project/m-dev-tools-mcp/), also listed on the [official MCP registry](https://registry.modelcontextprotocol.io/) as `io.github.m-dev-tools/m-dev-tools-mcp`) that exposes `route_intent` / `describe` / `verify` over the catalog so any MCP-capable agent (Claude Code, Codex, Continue, …) can resolve plain-English M-tooling intent without guessing. See the [**AI users guide**](../docs/ai-discoverability/ai-users-guide.md) for install paths (PyPI, `.mcp.json`, registry-driven), example sessions, and the no-MCP fallback that walks `tools.json` directly.
+
+## AI-integrated out-of-the-box
+
+**`m-dev-tools`** ships an MCP server ([`m-dev-tools-mcp`](https://pypi.org/project/m-dev-tools-mcp/), also listed on the [official MCP registry](https://registry.modelcontextprotocol.io/) as `io.github.m-dev-tools/m-dev-tools-mcp`) that exposes `route_intent` / `describe` / `verify` over the catalog so any MCP-capable agent (Claude Code, Codex, Continue, …) can resolve plain-English M-tooling intent without guessing. See the [**AI users guide**](../docs/ai-discoverability/ai-users-guide.md) for install paths (PyPI, `.mcp.json`, registry-driven), example sessions, and the no-MCP fallback that walks `tools.json` directly.
 
 
 ## The need for M Dev Tools
