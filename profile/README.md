@@ -169,38 +169,30 @@ m-dev-tools ships an MCP server ([`m-dev-tools-mcp`](https://pypi.org/project/m-
 
 M (MUMPS) is the language behind a great deal of healthcare and financial
 infrastructure, but its modern developer tooling has historically lagged
-behind mainstream languages. **`m-dev-tools`** provides the missing
-source-level pieces — a real parser, a unified language reference, a
-runtime standard library, and a `git`/`cargo`/`go`-style command-line
-toolchain — engineered to be useful regardless of which M engine you run.
+behind mainstream languages. The 2026 cross-engine gap analysis
+([`docs/history/m-tools-gap-analysis.md`](../docs/history/m-tools-gap-analysis.md))
+inventoried the deficit — no test runner, no logic linter, no formatter,
+no single-test selection, no test watcher — and ranked the missing pieces
+into [four impact tiers](../docs/history/m-tools-gap-analysis.md#8-rank-ordered-developer-impact-where-to-invest-first).
+**`m-dev-tools`** is the focused remediation of that top tier: the
+**inner development loop** that mainstream language ecosystems take for
+granted and that M has never had.
 
 The toolchain is **engine-neutral at the source layer** (`m fmt` and
-`m lint` care about M syntax, not a specific runtime), and **YottaDB-first
-with IRIS portability** at the runtime layer (test runner, coverage,
-stdlib).
+`m lint` care about M syntax, not a specific runtime), so a working
+install serves IRIS, YottaDB, and any future ANSI-compliant M engine
+equally.
 
 ## Getting started
 
-The preferred installer is [`setup.sh`](../setup.sh) — it detects your
-OS, checks prerequisites (`git` / `docker` / `python ≥ 3.12` / `uv` /
-`make`), clones [`m-cli`](https://github.com/m-dev-tools/m-cli), and
-delegates to `make bootstrap` for the rest (sibling clones, venv,
-engine boot, `m doctor` verification):
+See the [Getting started guide](../docs/guides/m-dev-tools-setup.md)
+for prerequisites, install paths, verification, and troubleshooting.
 
 ```bash
-# Review-first form (recommended):
 curl -O https://raw.githubusercontent.com/m-dev-tools/.github/main/setup.sh
 less ./setup.sh
 bash ./setup.sh
-
-# Or, for the convinced:
-bash <(curl -fsSL https://raw.githubusercontent.com/m-dev-tools/.github/main/setup.sh)
 ```
-
-See [`docs/guides/m-dev-tools-setup.md`](../docs/guides/m-dev-tools-setup.md)
-for the full walkthrough — prerequisites, manual install path,
-what `m doctor` verifies, next steps (TDD walkthrough, VS Code
-extensions, MCP server for AI agents), and troubleshooting.
 
 ## Licensing
 
