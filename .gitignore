@@ -1,5 +1,6 @@
 __pycache__/
 *.pyc
+.pytest_cache/
 .DS_Store
 
 # Phase 3 leftover: an early Track C agent run copied recipe / task_index

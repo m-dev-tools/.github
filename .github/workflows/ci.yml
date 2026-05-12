@@ -30,16 +30,17 @@ jobs:
           python-version: '3.12'
 
       - name: Install Phase-1 catalog dependencies
-        # build-catalog.py + validate-catalog.py need jsonschema.
-        # Pinned-ish — Draft 2020-12 has been stable for years and the
-        # validator API is small. Bump as needed; not part of the
-        # schema-compat contract.
-        run: pip install --upgrade pip 'jsonschema>=4.18'
+        # build-catalog.py + validate-catalog.py need jsonschema;
+        # the profile/build/test_*.py suite needs pytest. Pinned-ish —
+        # Draft 2020-12 has been stable for years and the validator API
+        # is small. Bump as needed; not part of the schema-compat
+        # contract.
+        run: pip install --upgrade pip 'jsonschema>=4.18' pytest
 
       - name: Run Phase-1 catalog unit tests
         # TDD safety net for build-catalog.py + validate-catalog.py.
         # Fails fast if a script edit broke a test.
-        run: pip install pytest && pytest profile/build/ -q
+        run: pytest profile/build/ -q
 
       - name: docs/ prose-only gate
         # Cross-repo guardrail: docs/ holds only human-readable prose.
