@@ -117,7 +117,7 @@ For each repo, in order:
 | `tree-sitter-m-vscode` | exists | `package.json` already declares it; wrap | needs add | tier 3 |
 | `m-stdlib-vscode` | needs check | `package.json` + manifest discovery config | needs add | tier 3 |
 | `m-cli-extras` | unknown | dump plugin entry points to JSON | needs add | tier 3 |
-| `m-tools` | archived (upstream) | **rehosted** under [`.github/docs/history/`](history/); dropped from `tools.json` | n/a | resolved |
+| `m-tools` | moved out of the org (now [`rafael5/m-tools`](https://github.com/rafael5/m-tools)) | **rehosted** under [`.github/docs/history/`](history/); dropped from `tools.json` | n/a | resolved |
 
 Until tier 1 emits machine-readable artifacts, the org catalog is fiction.
 
@@ -489,7 +489,8 @@ the live registry record.
 3. **No org-level CONTRIBUTING.md duplication of repo content.** The org
    `CONTRIBUTING.md` is ~30 lines pointing at each repo's own contribution
    guide.
-4. **No history/archive routing in the catalog.** `m-tools` is archived;
+4. **No history/archive routing in the catalog.** `m-tools` has been moved
+   out of the org (it now lives at [`rafael5/m-tools`](https://github.com/rafael5/m-tools));
    its three design docs are rehosted under
    [`.github/docs/history/`](history/) and routed via `task_index.json`'s
    `history` category as `doc:m-dev-tools#<slug>` typed IDs. The

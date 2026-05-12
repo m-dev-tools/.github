@@ -1,11 +1,11 @@
 # M Tools — Gap Analysis and Remediation Strategy
 
-> **Archived snapshot.** Imported verbatim from [`m-dev-tools/m-tools`](https://github.com/m-dev-tools/m-tools) — source commit [`16fe3f7`](https://github.com/m-dev-tools/m-tools/commit/16fe3f7dc6982070809cd1d8290d01fedc5905ac) (2026-04-27), before that repo was archived. Preserved as the original phased remediation roadmap that scoped what became `m-cli` and `m-stdlib`. **Not maintained.** For the *current* shape of the org, start at [`profile/README.md`](../../profile/README.md).
+> **Archived snapshot.** Imported verbatim from [`m-tools`](https://github.com/rafael5/m-tools) — source commit [`16fe3f7`](https://github.com/rafael5/m-tools/commit/16fe3f7dc6982070809cd1d8290d01fedc5905ac) (2026-04-27), at the point that repo seeded the rest of the m-dev-tools org (it has since been moved out of the org back to its original author's account). Preserved as the original phased remediation roadmap that scoped what became `m-cli` and `m-stdlib`. **Not maintained.** For the *current* shape of the org, start at [`profile/README.md`](../../profile/README.md).
 
 **Document type:** Strategic planning
 **Scope:** Developer toolchain for the M (MUMPS) language
 **Audience:** Developers building productivity tools for the M ecosystem
-**Sibling document:** [`implementation.md`](https://github.com/m-dev-tools/m-tools/blob/main/docs/implementation.md) — what's actually shipped *(not rehosted; resolves to the archived m-tools repo, which remains read-only on GitHub)*
+**Sibling document:** [`implementation.md`](https://github.com/rafael5/m-tools/blob/main/docs/implementation.md) — what's actually shipped *(not rehosted; resolves to the `rafael5/m-tools` repo on GitHub, where the m-tools content now lives after being moved out of the org)*
 
 ---
 

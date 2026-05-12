@@ -60,7 +60,7 @@ m-dev-tools ships an MCP server ([`m-dev-tools-mcp`](https://pypi.org/project/m-
 
 | Where | What it is |
 |---|---|
-| [`.github/docs/history/`](../docs/history/) | Frozen in-org snapshots of the design documents that seeded the entire org — the original 2026 gap analysis, the Tier 1–4 strategy, and the `m <subcommand>` command map that produced everything above. Imported verbatim from the (now archived) [`m-tools`](https://github.com/m-dev-tools/m-tools) repo. Start here for the *why*. |
+| [`.github/docs/history/`](../docs/history/) | Frozen in-org snapshots of the design documents that seeded the entire org — the original 2026 gap analysis, the Tier 1–4 strategy, and the `m <subcommand>` command map that produced everything above. Imported verbatim from the [`m-tools`](https://github.com/rafael5/m-tools) seed repo (since moved out of the org back to its original author's account). Start here for the *why*. |
 
 ## How the pieces connect
 
@@ -68,7 +68,7 @@ m-dev-tools ships an MCP server ([`m-dev-tools-mcp`](https://pypi.org/project/m-
                           ┌────────────────────────────────────┐
                           │   .github/docs/history/            │
                           │   (frozen snapshots from the       │
-                          │    archived m-tools seed repo)     │
+                          │    former m-tools seed repo)       │
                           │   • original gap analysis          │
                           │   • Tier 1–4 strategy docs         │
                           └─────────────────┬──────────────────┘

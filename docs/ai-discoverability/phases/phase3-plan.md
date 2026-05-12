@@ -29,7 +29,7 @@ hardening on a weekly schedule (Phase 5 — Phase 3 link-checks at PR time only)
 | Upstream phase | What Phase 3 needs from it | Status as of 2026-05-11 |
 |---|---|---|
 | **Phase 1** (org routing layer) | Generated `profile/tools.json` with `*_url` pointers, `profile/task_index.json` as the intent map, strict `llms.txt` | ✅ **CLOSED 2026-05-10** — A/B/C/D all merged (PRs #10/#11/#12/#16). `make catalog && make validate-catalog` green in CI on every push. `make catalog` byte-idempotent against `origin/main`. |
-| **Phase 2** (tier-2 repos `repo.meta.json`) | Recipes #6 (`investigate-failure`) and #7 (`add-editor-support`) reach into `tree-sitter-m`; their manifests must be in the catalog | ✅ **CLOSED 2026-05-10** — all 3 tier-2 + all 3 tier-3 repos onboarded the same day. `tools.json` carries **9 manifest-bearing entries** (m-tools the only archived holdout, rehosted under `docs/history/` per PR #17). |
+| **Phase 2** (tier-2 repos `repo.meta.json`) | Recipes #6 (`investigate-failure`) and #7 (`add-editor-support`) reach into `tree-sitter-m`; their manifests must be in the catalog | ✅ **CLOSED 2026-05-10** — all 3 tier-2 + all 3 tier-3 repos onboarded the same day. `tools.json` carries **9 manifest-bearing entries** (m-tools the only out-of-org holdout, rehosted under `docs/history/` per PR #17). |
 
 **Phase 3 launch state — both blockers resolved as of 2026-05-11.** All five
 tracks (A → B+C+D → E) are unblocked. Recipes 6 and 7 (originally Phase-2-
