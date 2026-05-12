@@ -3,12 +3,21 @@
 
 > **History**  For the *current* shape of the org, start at [`profile/README.md`](../../profile/README.md).
 
+This document is the **Tier 1 remediation plan**: the focused execution
+plan for filling the five tools that
+[`m-tools-gap-analysis.md` §8 ranks as Tier 1 — the development loop](m-tools-gap-analysis.md#tier-1--the-development-loop-transformative-impact)
+(test runner, logic linter, formatter, single-test selection, test
+watcher). These are the tools whose absence is felt every single edit,
+and where filling the gap is most transformative. The broader phased
+strategy covering Tiers 1–4 against YottaDB lives in
+[`m-tools-gap-analysis-remediation-ydb.md`](m-tools-gap-analysis-remediation-ydb.md).
+
 **Document type:** Strategic plan, scoped
 **Scope:** The five Tier 1 developer-toolchain gaps in the M (MUMPS) ecosystem
 **Audience:** Anyone planning, coordinating, or contributing to M-language tooling work
 **Companion documents:**
-- [m-tool-gap-analysis.md](m-tool-gap-analysis.md) — the broader cross-engine gap analysis (this doc focuses on its [§8 Tier 1](m-tool-gap-analysis.md#8-rank-ordered-developer-impact-where-to-invest-first))
-- [gap-analysis-and-remediation-strategy.md](gap-analysis-and-remediation-strategy.md) — the wider phased remediation plan (this doc is the focused Tier 1 extract)
+- [m-tools-gap-analysis.md](m-tools-gap-analysis.md) — the broader cross-engine gap analysis (this doc focuses on its [§8 Tier 1](m-tools-gap-analysis.md#tier-1--the-development-loop-transformative-impact))
+- [m-tools-gap-analysis-remediation-ydb.md](m-tools-gap-analysis-remediation-ydb.md) — the wider phased remediation plan (this doc is the focused Tier 1 extract)
 
 ---
 
@@ -38,7 +47,7 @@
 
 ## 1. The Tier 1 gaps
 
-The [§8 ranking in m-tool-gap-analysis.md](m-tool-gap-analysis.md#8-rank-ordered-developer-impact-where-to-invest-first) identifies five Tier 1 capabilities — the development inner loop — that are **MAJOR common gaps** across both major M engines (IRIS, YottaDB) for pure MUMPS code. They are the **transformative** tools, validated in [§8.5](m-tool-gap-analysis.md#85-validation-empirical-grounding-for-the-ranking) against DORA / *Accelerate* research and the broader literature on developer productivity.
+The [§8 ranking in m-tools-gap-analysis.md](m-tools-gap-analysis.md#8-rank-ordered-developer-impact-where-to-invest-first) identifies five Tier 1 capabilities — the development inner loop — that are **MAJOR common gaps** across both major M engines (IRIS, YottaDB) for pure MUMPS code. They are the **transformative** tools, validated in [§8.5](m-tools-gap-analysis.md#85-validation-empirical-grounding-for-the-ranking) against DORA / *Accelerate* research and the broader literature on developer productivity.
 
 | # | Capability | Why it's Tier 1 |
 |---|------------|-----------------|
@@ -153,7 +162,7 @@ The integration boundary with the engine is *only* the test-execution adapter �
 YottaDB is the primary build / development engine for two pragmatic reasons:
 
 1. **Open-source reproducibility.** AGPL-3.0 means anyone can install, run, and contribute without licence negotiation. CI runs in any standard container.
-2. **Mature C API.** `libyottadb.so` is a stable extensibility surface; foreign-language bindings (Go, Python, Rust, Node.js, Lua, Perl) make it straightforward to embed engine calls in tool implementations when needed (see [m-tool-gap-analysis.md §4.4](m-tool-gap-analysis.md#44-foreign-language-integration-embedded-language-vs-embedded-database) for the architecture rationale).
+2. **Mature C API.** `libyottadb.so` is a stable extensibility surface; foreign-language bindings (Go, Python, Rust, Node.js, Lua, Perl) make it straightforward to embed engine calls in tool implementations when needed (see [m-tools-gap-analysis.md §4.4](m-tools-gap-analysis.md#44-foreign-language-integration-embedded-language-vs-embedded-database) for the architecture rationale).
 
 But "built on YottaDB" never means "locked to YottaDB." Each tool's parser-side work is engine-neutral; only the test-execution shim varies by engine.
 
@@ -170,13 +179,13 @@ Before any Tier 1 tool is considered production-ready, it must pass:
 
 The Tier 1 plan does **not** cover:
 
-- **Coverage** (line / branch) — Tier 2 in [§8](m-tool-gap-analysis.md#8-rank-ordered-developer-impact-where-to-invest-first).
+- **Coverage** (line / branch) — Tier 2 in [§8](m-tools-gap-analysis.md#8-rank-ordered-developer-impact-where-to-invest-first).
 - **Documentation generation** — Tier 3.
 - **Dependency management** — Tier 3, blocked on a manifest-format design in `m-standard`.
 - **IDE / DAP integration** — Tier 2; substantial engineering on its own.
-- **IRIS ObjectScript (IOS) tooling** — out of scope; IOS is a separate language ([m-tool-gap-analysis.md §4.1.1](m-tool-gap-analysis.md#411-iris-objectscript-ios-what-it-is-and-why-it-isnt-ansi-standard-mumps)) with its own toolchain.
+- **IRIS ObjectScript (IOS) tooling** — out of scope; IOS is a separate language ([m-tools-gap-analysis.md §4.1.1](m-tools-gap-analysis.md#411-iris-objectscript-ios-what-it-is-and-why-it-isnt-ansi-standard-mumps)) with its own toolchain.
 
-These are excluded to keep the Tier 1 plan focused. Each is sequenced separately in [gap-analysis-and-remediation-strategy.md → Addendum B](gap-analysis-and-remediation-strategy.md#addendum-b-prioritized-sequence-of-remediation-post-parser).
+These are excluded to keep the Tier 1 plan focused. Each is sequenced separately in [m-tools-gap-analysis-remediation-ydb.md → Addendum B](m-tools-gap-analysis-remediation-ydb.md#addendum-b-prioritized-sequence-of-remediation-post-parser).
 
 ---
 
@@ -184,16 +193,16 @@ These are excluded to keep the Tier 1 plan focused. Each is sequenced separately
 
 The case for Tier 1 primacy has three legs, all already established in the companion analysis:
 
-**1. Empirical research on developer productivity.** [m-tool-gap-analysis.md §8.5](m-tool-gap-analysis.md#85-validation-empirical-grounding-for-the-ranking) cites primary sources:
+**1. Empirical research on developer productivity.** [m-tools-gap-analysis.md §8.5](m-tools-gap-analysis.md#85-validation-empirical-grounding-for-the-ranking) cites primary sources:
 
 - Forsgren, Humble & Kim (2018), *Accelerate*, identifies test automation as among the technical capabilities most strongly correlated with high software-delivery performance (DORA programme, 23,000+ respondents).
 - Sadowski et al. (2018), [*"Lessons from Building Static Analysis Tools at Google"*](https://cacm.acm.org/research/lessons-from-building-static-analysis-tools-at-google/) (CACM 61(4)) — Tricorder static analysis prevents hundreds of bugs per day from entering Google's codebase.
 - Vasilescu et al. (2015), [*"Quality and productivity outcomes relating to continuous integration in GitHub"*](https://web.cs.ucdavis.edu/~filkov/papers/pr_soc_lan.pdf) (FSE 2015) — CI users merge PRs significantly faster and find more bugs.
 - Stack Overflow Annual Developer Survey: Ruff (84% admired) and Cargo (83% admired) — top-of-survey tools that bundle the Tier 1 capabilities.
 
-**2. Cross-engine consolidation.** [§7 in m-tool-gap-analysis.md](m-tool-gap-analysis.md#7-consolidated-gap-analysis) shows that **all five Tier 1 capabilities are MAJOR common gaps** — both IRIS and YottaDB ship **None** for MUMPS code. **A single source-level tool, built on a shared parser foundation, fills the gap on every M engine simultaneously.** That economy of leverage is the strategic case for treating M as a portable language with portable tooling, not as a vendor-locked feature.
+**2. Cross-engine consolidation.** [§7 in m-tools-gap-analysis.md](m-tools-gap-analysis.md#7-consolidated-gap-analysis) shows that **all five Tier 1 capabilities are MAJOR common gaps** — both IRIS and YottaDB ship **None** for MUMPS code. **A single source-level tool, built on a shared parser foundation, fills the gap on every M engine simultaneously.** That economy of leverage is the strategic case for treating M as a portable language with portable tooling, not as a vendor-locked feature.
 
-**3. The 40,000-routine VistA reality.** [§6.1 / §6.2](m-tool-gap-analysis.md#6-the-real-question-developer-experience-for-a-legacy-mumps-codebase) of m-tool-gap-analysis frames the real-world stakes: a VistA codebase has effectively zero benefit from IRIS's IOS-targeted tooling (the wrappers don't reach the MUMPS code) and effectively zero benefit from YottaDB's runtime-first investment (the developer-experience layer simply isn't there). Tier 1 is the work that closes the gap *for the actual M codebase that matters most*.
+**3. The 40,000-routine VistA reality.** [§6.1 / §6.2](m-tools-gap-analysis.md#6-the-real-question-developer-experience-for-a-legacy-mumps-codebase) of m-tool-gap-analysis frames the real-world stakes: a VistA codebase has effectively zero benefit from IRIS's IOS-targeted tooling (the wrappers don't reach the MUMPS code) and effectively zero benefit from YottaDB's runtime-first investment (the developer-experience layer simply isn't there). Tier 1 is the work that closes the gap *for the actual M codebase that matters most*.
 
 ---
 
@@ -205,7 +214,7 @@ The five questions raised during initial planning now have working resolutions. 
 
 **Decision: defer indefinitely. Tier 1 ships without an IRIS adapter.**
 
-InterSystems' demonstrated trajectory is to promote IRIS ObjectScript (IOS) as the developer-facing language and to scrub mention of MUMPS where possible — the 2018 Caché → IRIS rename was a marketing exercise, and IOS is a proprietary wrapper sitting *between* IRIS users and the MUMPS substrate. The vendor is not investing in MUMPS-side developer experience and has shown no interest in doing so. (See [m-tool-gap-analysis.md §1.2 naming history](m-tool-gap-analysis.md#naming-history-intersystems-mumps--caché-objectscript--iris-objectscript-ios) and [§4.1.3](m-tool-gap-analysis.md#413-iris-tooling-by-file-scope-and-language) for the evidence.)
+InterSystems' demonstrated trajectory is to promote IRIS ObjectScript (IOS) as the developer-facing language and to scrub mention of MUMPS where possible — the 2018 Caché → IRIS rename was a marketing exercise, and IOS is a proprietary wrapper sitting *between* IRIS users and the MUMPS substrate. The vendor is not investing in MUMPS-side developer experience and has shown no interest in doing so. (See [m-tools-gap-analysis.md §1.2 naming history](m-tools-gap-analysis.md#naming-history-intersystems-mumps--caché-objectscript--iris-objectscript-ios) and [§4.1.3](m-tools-gap-analysis.md#413-iris-tooling-by-file-scope-and-language) for the evidence.)
 
 Building and maintaining an IRIS adapter would require coordinating with a vendor whose strategic interests are misaligned with the goals of this work. The pragmatic choice is to invest the same effort in YottaDB and the source-level tooling — which ports automatically to any conformant M engine — and let an IRIS adapter remain a community contribution if one ever emerges. The source-level tools (formatter, linter, test discovery) are unaffected by this decision; they run on `.m` files via the parser, regardless of which engine the runtime side targets.
 
@@ -258,4 +267,4 @@ Mechanics:
 
 ---
 
-*End of m-tooling-tier1 document.*
+*End of m-tools-remediation-tier1 document.*

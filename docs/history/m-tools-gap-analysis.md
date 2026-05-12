@@ -45,6 +45,10 @@
   - [6.4 The bottom line](#64-the-bottom-line)
 - [7. Consolidated Gap Analysis](#7-consolidated-gap-analysis)
 - [8. Rank-Ordered Developer Impact: Where to Invest First](#8-rank-ordered-developer-impact-where-to-invest-first)
+  - [Tier 1 — The development loop (transformative impact)](#tier-1--the-development-loop-transformative-impact)
+  - [Tier 2 — Quality gates and team scaling (high impact)](#tier-2--quality-gates-and-team-scaling-high-impact)
+  - [Tier 3 — Maintenance and ecosystem (medium impact)](#tier-3--maintenance-and-ecosystem-medium-impact)
+  - [Tier 4 — Specialised or quality-of-life (lower impact)](#tier-4--specialised-or-quality-of-life-lower-impact)
 
 ---
 
