@@ -19,29 +19,32 @@ containerized test engine
 ([`m-test-engine`](https://github.com/m-dev-tools/m-test-engine)), and
 editor integrations, they form an end-to-end TDD stack that works
 identically for **InterSystems IRIS** and **YottaDB** developers
-maintaining modern (non-VistA) M code.
+maintaining modern (pythonic) M code, as well as large legacy (VistA) M code.
 
-## AI-integrated out-of-the-box
+### AI-integrated out-of-the-box
 
 m-dev-tools ships an MCP server ([`m-dev-tools-mcp`](https://pypi.org/project/m-dev-tools-mcp/), also listed on the [official MCP registry](https://registry.modelcontextprotocol.io/) as `io.github.m-dev-tools/m-dev-tools-mcp`) that exposes `route_intent` / `describe` / `verify` over the catalog so any MCP-capable agent (Claude Code, Codex, Continue, …) can resolve plain-English M-tooling intent without guessing. See the [**AI users guide**](../docs/ai-discoverability/ai-users-guide.md) for install paths (PyPI, `.mcp.json`, registry-driven), example sessions, and the no-MCP fallback that walks `tools.json` directly.
 
 
-## Why we need modern M Developer Tools
+## The gaps in M development today
 
 M (MUMPS) is the language behind a great deal of healthcare and financial
 infrastructure, but its modern developer tooling has historically lagged
-behind mainstream languages. The 2026 cross-engine gap analysis
-([`docs/history/m-tools-gap-analysis.md`](../docs/history/m-tools-gap-analysis.md)) inventoried the deficit — no test runner, no logic linter, no formatter,
-no single-test selection, no test watcher — and ranked the missing pieces
-into [four impact tiers](../docs/history/m-tools-gap-analysis.md#8-rank-ordered-developer-impact-where-to-invest-first).
-**`m-dev-tools`** is the focused remediation of that top tier: the
-**inner development loop** that mainstream language ecosystems take for
-granted and that M has never had.
+behind mainstream languages. The 2026 cross-engine gap analysis ([`docs/history/m-tools-gap-analysis.md`](../docs/history/m-tools-gap-analysis.md)) inventoried the deficit — no test runner, no logic linter, no formatter, no single-test selection, no test watcher — and ranked the missing pieces into [four impact tiers](../docs/history/m-tools-gap-analysis.md#8-rank-ordered-developer-impact-where-to-invest-first). 
 
-The toolchain is **engine-neutral at the source layer** (`m fmt` and
-`m lint` care about M syntax, not a specific runtime), so a working
-install serves IRIS, YottaDB, and any future ANSI-compliant M engine
-equally.
+**`m-dev-tools`** is the focused remediation of that top tier: the **inner development loop** that mainstream language ecosystems take for granted and that M has never had.   m-dev-tools also provides a vendor-neutral, portable, **industry-conformant M standard library**, which has not existed to date.
+
+
+
+## Modern M development:  A walkthrough
+
+The [m-cli TDD lifecycle walkthrough](../docs/guides/m-tdd-stdlib-walkthrough.md)
+is an end-to-end transcript of building a small data-analysis app —
+`reqstats`, an HTTP-access-log summarizer — using only the `m`
+toolchain and `m-stdlib`. Exercises every `m <subcommand>` (fmt /
+lint / test / coverage / watch / lsp / new / run / build / ci) and
+the M standard library it consumes. The fastest way to see modern test-driven development with continuous integration on a clean host.
+
 
 
 ## Getting started
@@ -54,17 +57,6 @@ curl -O https://raw.githubusercontent.com/m-dev-tools/.github/main/setup.sh
 less ./setup.sh
 bash ./setup.sh
 ```
-
-## Example of M Test-Driven Development with the M Standard Library
-
-The [m-cli TDD lifecycle walkthrough](../docs/guides/m-tdd-stdlib-walkthrough.md)
-is an end-to-end transcript of building a small data-analysis app —
-`reqstats`, an HTTP-access-log summarizer — using only the `m`
-toolchain and `m-stdlib`. Exercises every `m <subcommand>` (fmt /
-lint / test / coverage / watch / lsp / new / run / build / ci) and
-the standard library it consumes. The fastest way to see a modern
-M inner loop in action on a clean host.
-
 
 
 ## Repositories
