@@ -91,6 +91,19 @@
       "enum": ["active", "archived", "deprecated"],
       "description": "Repo lifecycle status. Defaults to 'active' when omitted."
     },
+    "docs": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Repo-level documentation metadata consumed by validate-docs.py (docs-discoverability spec §5.1). Optional — repos with only hand-written prose docs may omit this block entirely.",
+      "properties": {
+        "generated_paths": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true,
+          "description": "Glob patterns (relative to repo root, e.g. 'docs/modules/std*.md') for documentation files produced by a generator. Files matching these globs are exempt from the prose schema; validate-docs.py asserts only `generated: true` + `last_modified` drift against the source manifest. See docs-discoverability-spec.md §5.1."
+        }
+      }
+    },
     "notes": {
       "type": "string",
       "description": "Free-text notes for human readers. Not consumed by the catalog generator."

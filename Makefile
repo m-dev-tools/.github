@@ -1,4 +1,4 @@
-.PHONY: catalog validate-catalog check-catalog check-repo-meta phase0-smoke check-docs-prose recipes-check handshake check-freshness check-links check-licenses check-schema-compat
+.PHONY: catalog validate-catalog check-catalog check-repo-meta phase0-smoke check-docs-prose recipes-check handshake check-freshness check-links check-licenses check-schema-compat check-docs
 
 # Phase-1 Track B's generator. Fetches each TIER_1+TIER_2+TIER_3 repo's
 # dist/repo.meta.json, validates it, translates it into a `tools.<key>`
@@ -133,3 +133,13 @@ check-licenses:
 # true→false) landed without a schema_compat bump.
 check-schema-compat:
 	python3 profile/build/check-schema-compat.py
+
+# docs-discoverability Phase 1 (P1.3): validate prose-doc frontmatter
+# under docs/ against profile/docs.schema.json. Phase 1 invocation is
+# --warn-only per docs-discoverability-spec.md §10 — surfaces issues
+# without failing CI while the org backfills frontmatter across the
+# corpus. Phase 2 will drop --warn-only; Phase 3 adds the cross-repo
+# walker. This target is the .github repo's self-check; the tier-1+2
+# repos get their own `make check-docs` in P1.4 sessions.
+check-docs:
+	python3 profile/build/validate-docs.py --docs-root docs --warn-only

@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/m-dev-tools/.github/main/profile/docs.schema.json",
+  "title": "m-dev-tools doc frontmatter",
+  "description": "Validation contract for the YAML frontmatter block at the top of every prose document under any repo's docs/ tree. Sibling of recipe.schema.json (for docs/recipes/*.md) and repo.meta.schema.json (for dist/repo.meta.json). Two variants gated on the `generated` field: prose docs (require doc_type+lifecycle+the git-derived trio) and generator-emitted docs (only `generated: true` + drift markers — see docs-discoverability-spec.md §5.1).",
+  "type": "object",
+  "if": {
+    "properties": {
+      "generated": { "const": true }
+    },
+    "required": ["generated"]
+  },
+  "then": {
+    "$ref": "#/$defs/generatedDoc"
+  },
+  "else": {
+    "$ref": "#/$defs/proseDoc"
+  },
+  "$defs": {
+    "proseDoc": {
+      "type": "object",
+      "required": [
+        "created",
+        "last_modified",
+        "revisions",
+        "doc_type",
+        "lifecycle"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "created": {
+          "$ref": "#/$defs/isoDate",
+          "description": "ISO date of the file's first git commit. Tooling-populated from `git log --follow`; never hand-edited."
+        },
+        "last_modified": {
+          "$ref": "#/$defs/isoDate",
+          "description": "ISO date of the file's latest git commit. Tooling-populated; never hand-edited."
+        },
+        "revisions": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of commits touching this file. Tooling-populated; never hand-edited."
+        },
+        "doc_type": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/docType" },
+          "description": "One or more entries from the 23-type vocabulary. Combinations are allowed and meaningful (see spec §4 refactor heuristics)."
+        },
+        "lifecycle": {
+          "$ref": "#/$defs/lifecycle",
+          "description": "Lifecycle state. Default for the org-wide backfill: `active`."
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable title. Optional but strongly encouraged for catalog rendering."
+        },
+        "owner": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9-]*$",
+          "description": "GitHub handle of the accountable owner. Defaults to the repo's top contributor when omitted."
+        },
+        "connections": {
+          "type": "array",
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/connection" },
+          "description": "0–3 connection types from the 6-vocab. Optional in Phase 1."
+        },
+        "replaces": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Paths to other docs this one supersedes. If A says `replaces: [B]`, B must say `superseded_by: A` (Phase 3 bidirectional check)."
+        },
+        "supersedes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Alias of `replaces`. Pick one per doc."
+        },
+        "superseded_by": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path to the doc that retired this one."
+        },
+        "related": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Paths to related docs. Not a supersession claim."
+        },
+        "freeze_after": {
+          "$ref": "#/$defs/isoDate",
+          "description": "Date after which this doc's lifecycle should flip to `frozen` (e.g., release plans at GA)."
+        },
+        "review_after": {
+          "$ref": "#/$defs/isoDate",
+          "description": "Date after which this doc surfaces in the freshness report. Phase 3 cron honors this."
+        },
+        "generated": {
+          "const": false,
+          "description": "Explicit `false` is accepted but redundant — absence implies prose."
+        }
+      }
+    },
+    "generatedDoc": {
+      "type": "object",
+      "required": ["generated", "last_modified"],
+      "additionalProperties": true,
+      "properties": {
+        "generated": {
+          "const": true,
+          "description": "Marks this doc as generator-emitted. See docs-discoverability-spec.md §5.1: docs-QA CI skips all prose checks for these and asserts only path-declaration + drift-vs-generator."
+        },
+        "last_modified": {
+          "$ref": "#/$defs/isoDate",
+          "description": "Date of the generator run that wrote this file. Drift gate (Phase 1 check #5) compares against the source manifest's `verified_on`."
+        }
+      }
+    },
+    "docType": {
+      "type": "string",
+      "enum": [
+        "HISTORY",
+        "ARCHITECTURE",
+        "DESIGN",
+        "ADR",
+        "SPEC",
+        "REFERENCE",
+        "GUIDE",
+        "TUTORIAL",
+        "ROADMAP",
+        "PLAN",
+        "RESEARCH",
+        "SURVEY",
+        "GAP-ANALYSIS",
+        "STATUS",
+        "EXPLAINER",
+        "NOTES",
+        "WORKED-EXAMPLE",
+        "SETUP",
+        "INTEGRATION",
+        "PROPOSAL",
+        "BUILD-LOG",
+        "CHANGELOG",
+        "POSTMORTEM"
+      ]
+    },
+    "lifecycle": {
+      "type": "string",
+      "enum": ["draft", "active", "frozen", "superseded", "deprecated"]
+    },
+    "connection": {
+      "type": "string",
+      "enum": [
+        "history",
+        "function",
+        "design",
+        "architecture",
+        "planning",
+        "implementation"
+      ]
+    },
+    "isoDate": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    }
+  }
+}
