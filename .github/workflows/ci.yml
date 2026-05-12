@@ -47,6 +47,15 @@ jobs:
         # tier-1 + tier-2 + tier-3 repo.
         run: make check-docs-prose
 
+      - name: docs frontmatter gate (docs-discoverability Phase 1)
+        # Phase 1 P1.3 + P1.3b: validate prose-doc frontmatter under
+        # docs/ against profile/docs.schema.json. --warn-only per spec
+        # §10 — surfaces issues without failing CI while the org
+        # backfills frontmatter across the corpus. Drops --warn-only at
+        # Phase 2. The tier-1+2 repos get this same step (P1.5) in
+        # their own sessions.
+        run: make check-docs
+
       - name: Validate catalog (schema-strict)
         # Real jsonschema validation against tools.schema.json +
         # task_index.schema.json. Replaces the prior parse-only gate.

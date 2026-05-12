@@ -1,7 +1,7 @@
 ---
 created: 2026-05-11
-last_modified: 2026-05-11
-revisions: 2
+last_modified: 2026-05-12
+revisions: 3
 doc_type: [STATUS]
 lifecycle: active
 owner: rmrich5
@@ -29,7 +29,7 @@ one of the legal values.
 | Phase | Theme | Target | Status | Reference |
 |---|---|---|---|---|
 | 0 | Vocabulary, frontmatter, indexes, acceptance | 2026-05-11 | done | [§10 P0](docs-discoverability-spec.md#phase-0--done-2026-05-11) |
-| 1 | Schema + warn-only CI | 2026-Q2 weeks 1–4 | not-started | [§10 P1](docs-discoverability-spec.md#phase-1--schema--warn-only-ci-target-2026-q2-weeks-14) |
+| 1 | Schema + warn-only CI | 2026-Q2 weeks 1–4 | in-progress | [§10 P1](docs-discoverability-spec.md#phase-1--schema--warn-only-ci-target-2026-q2-weeks-14) |
 | 2 | Block on new docs; first remediations | 2026-Q2 weeks 5–8 | not-started | [§10 P2](docs-discoverability-spec.md#phase-2--block-on-new-docs-target-2026-q2-weeks-58) |
 | 3 | Block everywhere; org catalog | 2026-Q3 | not-started | [§10 P3](docs-discoverability-spec.md#phase-3--block-everywhere-org-catalog-target-2026-q3) |
 | 4 | Cross-repo + freshness | 2026-Q4 | not-started | [§10 P4](docs-discoverability-spec.md#phase-4--cross-repo-and-freshness-target-2026-q4) |
@@ -57,16 +57,18 @@ Target: **2026-Q2 weeks 1–4**. Owner default: rmrich5 unless reassigned.
 
 | ID | Item | Status | Target | Blocked-by | Notes |
 |---|---|---|---|---|---|
-| P1.1 | Land `profile/docs.schema.json` | not-started | Q2 wk 1 | — | Sibling of repo.meta.schema.json |
-| P1.2 | Extend `profile/repo.meta.schema.json` with `docs.generated_paths` array | not-started | Q2 wk 1 | — | Enables §5.1 exclusion rule |
-| P1.3 | Land `profile/build/validate-docs.py` + tests | not-started | Q2 wk 2 | P1.1, P1.2 | Copy pattern from validate-catalog.py |
+| P1.1 | Land `profile/docs.schema.json` | done | 2026-05-12 | — | Sibling of repo.meta.schema.json; two variants (prose vs generated) gated on the `generated` field via if/then |
+| P1.2 | Extend `profile/repo.meta.schema.json` with `docs.generated_paths` array | done | 2026-05-12 | — | Enables §5.1 exclusion rule; bidirectional check (path↔marker) implemented in P1.3 |
+| P1.3 | Land `profile/build/validate-docs.py` + tests | done | 2026-05-12 | P1.1, P1.2 | TDD'd against 13 cases; covers spec §9 checks 0–4. Checks 5–8 (git-derived field drift, README existence, orphan/dangling refs) are Phase-1 follow-up |
+| P1.3b | `.github` repo's own `make check-docs` target (self-check) | done | 2026-05-12 | P1.3 | Bonus: the meta-repo dogfoods the validator. Warn-only against `.github/docs/`; surfaces 21 issues (`.github` was outside Phase 0's 7-repo backfill) |
 | P1.4 | Add `make check-docs` target to each of the 7 repos | not-started | Q2 wk 2 | P1.3 | One PR per repo |
 | P1.5 | Wire CI step into per-repo workflows (warn-only) | not-started | Q2 wk 3 | P1.4 | Don't block PRs yet |
-| P1.6 | Backfill `lifecycle: active` across all 108 docs | not-started | Q2 wk 3 | P1.1 | Default value; one-time pass |
+| P1.6 | Backfill `lifecycle: active` across all 108 docs | not-started | Q2 wk 3 | P1.1 | Default value; one-time pass. Plus ~21 docs in `.github` itself |
 | P1.7 | Backfill `owner:` across all 108 docs | not-started | Q2 wk 3 | P1.1 | From `git shortlog -sn` per repo |
 | P1.8 | Add `generated: true` to m-stdlib `docs/modules/std*.md` | not-started | Q2 wk 4 | P1.2 | Done by `make manifest` regeneration |
 | P1.9 | Declare m-stdlib's `docs/modules/` in `docs.generated_paths` | not-started | Q2 wk 4 | P1.2 | One-line edit to repo.meta.json |
 | P1.10 | Run weekly cron once with warn-only CI; review noise | not-started | end of Q2 wk 4 | P1.5 | Decision gate before Phase 2 |
+| P1.11 | Implement spec §9 checks 5–8 (git-derived drift; README existence; orphan/dangling refs) | not-started | Q2 wk 3 | P1.3 | Validator-side follow-up; lands as a second PR to `.github` |
 
 ---
 
@@ -77,15 +79,15 @@ Each check lands in the indicated phase.
 
 | # | Check | Phase | Status | Implementation note |
 |---|---|---|---|---|
-| 0 | Generated-doc gate (skip if `generated: true`) | 1 | not-started | Hard short-circuit; first check evaluated |
-| 1 | Frontmatter present | 1 | not-started | YAML block at top |
-| 2 | Required keys present | 1 | not-started | created, last_modified, revisions, doc_type, lifecycle |
-| 3 | `doc_type` values valid | 1 | not-started | From the 23-vocab in docs.schema.json |
-| 4 | `lifecycle` value valid | 1 | not-started | One of 5 states |
-| 5 | created/last_modified/revisions match git | 1 | not-started | Auto-fixable; tooling regenerates |
-| 6 | `docs/README.md` exists | 1 | not-started | Per-repo gate |
-| 7 | No orphans (every `.md` in index) | 1 | not-started | Bidirectional check |
-| 8 | No dangling refs in `README.md` | 1 | not-started | Local link resolution |
+| 0 | Generated-doc gate (skip if `generated: true`) | 1 | done | `docs.schema.json` if/then short-circuit + path↔marker bidirectional check in validate-docs.py |
+| 1 | Frontmatter present | 1 | done | `parse_frontmatter` returns None → "missing YAML frontmatter block" error |
+| 2 | Required keys present | 1 | done | Schema `required: [created, last_modified, revisions, doc_type, lifecycle]` |
+| 3 | `doc_type` values valid | 1 | done | Schema enum (23 entries) |
+| 4 | `lifecycle` value valid | 1 | done | Schema enum (5 states) |
+| 5 | created/last_modified/revisions match git | 1 | not-started | Auto-fixable; tooling regenerates. Tracked as P1.11 |
+| 6 | `docs/README.md` exists | 1 | not-started | Per-repo gate. Tracked as P1.11 |
+| 7 | No orphans (every `.md` in index) | 1 | not-started | Bidirectional check. Tracked as P1.11 |
+| 8 | No dangling refs in `README.md` | 1 | not-started | Local link resolution. Tracked as P1.11 |
 | 9 | Filename matches doc_type | 2 | not-started | Per spec §7 table |
 | 10 | Filename content-derived (no `and`, kebab-case) | 2 | not-started | |
 | 11 | Required H2 sections per doc_type | 2 | not-started | Per spec §8 table |
