@@ -1,4 +1,4 @@
-# m-dev-tools
+# M Developer Tools
 
 **A suite of engine-neutral developer tools for the M (MUMPS) programming
 language, built around a CI/CD-friendly, test-driven-development workflow.**
