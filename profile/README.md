@@ -26,24 +26,19 @@ maintaining modern (pythonic) M code, as well as large legacy (VistA) M code.
 m-dev-tools ships an MCP server ([`m-dev-tools-mcp`](https://pypi.org/project/m-dev-tools-mcp/), also listed on the [official MCP registry](https://registry.modelcontextprotocol.io/) as `io.github.m-dev-tools/m-dev-tools-mcp`) that exposes `route_intent` / `describe` / `verify` over the catalog so any MCP-capable agent (Claude Code, Codex, Continue, …) can resolve plain-English M-tooling intent without guessing. See the [**AI users guide**](../docs/ai-discoverability/ai-users-guide.md) for install paths (PyPI, `.mcp.json`, registry-driven), example sessions, and the no-MCP fallback that walks `tools.json` directly.
 
 
-## The gaps in M development today
+## The need for M Dev Tools
 
-M (MUMPS) is the language behind a great deal of healthcare and financial
-infrastructure, but its modern developer tooling has historically lagged
+M (MUMPS) is the language supporting a great deal of healthcare and financial
+infrastructure worldwide, but its modern developer tooling has historically lagged
 behind mainstream languages. The 2026 cross-engine gap analysis ([`docs/history/m-tools-gap-analysis.md`](../docs/history/m-tools-gap-analysis.md)) inventoried the deficit — no test runner, no logic linter, no formatter, no single-test selection, no test watcher — and ranked the missing pieces into [four impact tiers](../docs/history/m-tools-gap-analysis.md#8-rank-ordered-developer-impact-where-to-invest-first). 
 
-**`m-dev-tools`** is the focused remediation of that top tier: the **inner development loop** that mainstream language ecosystems take for granted and that M has never had.   m-dev-tools also provides a vendor-neutral, portable, **industry-conformant M standard library**, which has not existed to date.
+**`m-dev-tools`** is the focused remediation of that top tier: the **inner development loop** that mainstream language ecosystems take for granted and that M has never had.  **`m-dev-tools`** also provides a portable, industry-conformant **M standard library** which has not existed to date, enabling rapid development of applications without re-inventing wheels.
 
 
+## M Dev Tools: A walkthrough
 
-## Modern M development:  A walkthrough
-
-The [m-cli TDD lifecycle walkthrough](../docs/guides/m-tdd-stdlib-walkthrough.md)
-is an end-to-end transcript of building a small data-analysis app —
-`reqstats`, an HTTP-access-log summarizer — using only the `m`
-toolchain and `m-stdlib`. Exercises every `m <subcommand>` (fmt /
-lint / test / coverage / watch / lsp / new / run / build / ci) and
-the M standard library it consumes. The fastest way to see modern test-driven development with continuous integration on a clean host.
+The [M test-driven-development walkthrough](../docs/guides/m-tdd-stdlib-walkthrough.md) is an end-to-end transcript of building a small data-analysis app — `reqstats`, an HTTP-access-log summarizer — using only the `m` toolchain and `m-stdlib`. Exercises every `m <subcommand>` (fmt /
+lint / test / coverage / watch / lsp / new / run / build / ci) and the M standard library it consumes. The fastest way to see modern test-driven development with continuous integration on a clean host.
 
 
 
