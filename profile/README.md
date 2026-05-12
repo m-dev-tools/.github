@@ -181,24 +181,26 @@ stdlib).
 
 ## Getting started
 
-A typical first install:
+The preferred installer is [`setup.sh`](../setup.sh) — it detects your
+OS, checks prerequisites (`git` / `docker` / `python ≥ 3.12` / `uv` /
+`make`), clones [`m-cli`](https://github.com/m-dev-tools/m-cli), and
+delegates to `make bootstrap` for the rest (sibling clones, venv,
+engine boot, `m doctor` verification):
 
 ```bash
-# Foundation: parser + toolchain
-git clone https://github.com/m-dev-tools/tree-sitter-m
-git clone https://github.com/m-dev-tools/m-cli
-pip install ./tree-sitter-m   # order matters — m-cli's dep declaration
-pip install ./m-cli           # needs the tree-sitter-m checkout present
+# Review-first form (recommended):
+curl -O https://raw.githubusercontent.com/m-dev-tools/.github/main/setup.sh
+less ./setup.sh
+bash ./setup.sh
 
-# Verify
-m doctor
-m --help
+# Or, for the convinced:
+bash <(curl -fsSL https://raw.githubusercontent.com/m-dev-tools/.github/main/setup.sh)
 ```
 
-For runtime work on YottaDB, also clone [`m-stdlib`](https://github.com/m-dev-tools/m-stdlib).
-For VS Code, install the marketplace extensions (currently published under
-the personal `rafael5` publisher; rebranding to a `m-dev-tools` Marketplace
-publisher is on the roadmap).
+See [`docs/guides/m-dev-tools-setup.md`](../docs/guides/m-dev-tools-setup.md)
+for the full walkthrough — prerequisites, manual install path,
+what `m doctor` verifies, next steps (TDD walkthrough, VS Code
+extensions, MCP server for AI agents), and troubleshooting.
 
 ## Licensing
 
