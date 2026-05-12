@@ -23,7 +23,10 @@
 #   4. Delegates the rest (sibling clones, venv install, engine
 #      install + start, m doctor verification) to `make bootstrap`
 #      inside m-cli.
-#   5. Prints PATH-setup advice and a "next steps" pointer to the
+#   5. Post-install: regenerates the m-stdlib inventory
+#      (`make manifest`) and installs the AI knowledge skill
+#      (`make skill-install`) when ~/claude/skills/ is present.
+#   6. Prints PATH-setup advice and a "next steps" pointer to the
 #      TDD lifecycle walkthrough.
 #
 # Idempotent — re-running on an already-installed host skips the
@@ -253,6 +256,40 @@ info "Delegating to 'make bootstrap' inside m-cli..."
 cd m-cli
 make bootstrap
 
+# ── post-install tasks ───────────────────────────────────────────────
+# After bootstrap clones m-stdlib and the other siblings, regenerate
+# the m-stdlib inventory (drift-check on the committed dist/ artefacts)
+# and — on a Claude Code host — install the AI knowledge skill into
+# ~/claude/skills/m-stdlib/.
+#
+# Both targets shell out to python3 in m-stdlib's Makefile, so they
+# don't require m-cli's venv on PATH. Failures here are warned, not
+# fatal — the workspace is already usable after `make bootstrap`.
+info "Running post-install tasks..."
+
+M_STDLIB="$M_DEV_HOME/m-stdlib"
+if [[ -d "$M_STDLIB" ]]; then
+  info "  m-stdlib: regenerating inventory (make manifest)..."
+  if ( cd "$M_STDLIB" && make manifest >/dev/null ); then
+    ok "m-stdlib inventory up to date"
+  else
+    warn "m-stdlib 'make manifest' failed — re-run inside $M_STDLIB to investigate."
+  fi
+
+  if [[ -d "$HOME/claude/skills" ]]; then
+    info "  m-stdlib: installing AI knowledge skill (make skill-install)..."
+    if ( cd "$M_STDLIB" && make skill-install >/dev/null ); then
+      ok "m-stdlib skill installed at $HOME/claude/skills/m-stdlib/"
+    else
+      warn "m-stdlib 'make skill-install' failed — re-run inside $M_STDLIB to investigate."
+    fi
+  else
+    info "  m-stdlib: skipping skill-install (no ~/claude/skills/ — not a Claude Code host)"
+  fi
+else
+  warn "m-stdlib not found at $M_STDLIB — skipping post-install tasks."
+fi
+
 # ── next steps ───────────────────────────────────────────────────────
 printf '\n'
 ok "Setup complete."
@@ -266,6 +303,7 @@ Next steps:
   2. Verify on a new shell:
        m --version
        m doctor
+       m stdlib list        # confirms the m-stdlib manifest is discoverable
 
   3. Read the TDD lifecycle walkthrough — exercises every m subcommand
      end-to-end against a small data-analysis app:
