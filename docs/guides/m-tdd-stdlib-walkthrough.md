@@ -5,7 +5,7 @@ revisions: 1
 doc_type: [WORKED-EXAMPLE, TUTORIAL, SMOKE-TEST]
 ---
 
-# m-cli TDD lifecycle walkthrough
+## M Test-Driven Development: A Walkthrough
 
 End-to-end transcript of a real M developer building a small
 data-analysis application — **`reqstats`**, an HTTP-access-log
@@ -27,82 +27,12 @@ inner-loop chain end to end.
 
 ---
 
-## Prerequisites — turnkey setup on a fresh host
+## Prerequisites
 
-Anyone on any machine should be able to follow this walkthrough from
-zero. Setup is one-time per machine.
-
-### System tools
-
-| Tool          | Why                                       | Verify             |
-| ------------- | ----------------------------------------- | ------------------ |
-| **git**       | clone the repos                           | `git --version`    |
-| **docker**    | runs the m-test-engine YottaDB container  | `docker --version` |
-| **Python 3.12+** | m-cli is a Python package              | `python3 --version` |
-| **uv**        | m-cli's dependency manager + venv         | `uv --version`     |
-| **make**      | optional; convenience targets             | `make --version`   |
-
-On Linux: `apt install git docker.io python3.12 make`, then
-[install uv](https://docs.astral.sh/uv/getting-started/installation/)
-(`curl -LsSf https://astral.sh/uv/install.sh | sh`). On macOS:
-`brew install git docker python@3.12 uv`. Docker requires the daemon
-running (Docker Desktop on macOS / Windows, `systemctl start docker`
-on Linux).
-
-### Clone the repos
-
-m-cli has two hard dependencies that must live as sibling checkouts —
-its `pyproject.toml` declares them by relative path. m-stdlib is the
-library we're going to call from `reqstats`, so we need that too.
-
-```bash
-mkdir -p ~/m-dev-tools && cd ~/m-dev-tools
-git clone https://github.com/m-dev-tools/tree-sitter-m
-git clone https://github.com/m-dev-tools/m-standard
-git clone https://github.com/m-dev-tools/m-cli
-git clone https://github.com/m-dev-tools/m-stdlib
-```
-
-(`tree-sitter-m` is the parser m-cli builds on; `m-standard` is the
-language reference m-cli loads keyword/symbol tables from. Both are
-mandatory.)
-
-### Install m-cli into a venv
-
-```bash
-cd ~/m-dev-tools/m-cli
-make install                       # uv sync --extra dev + pre-commit hooks
-.venv/bin/m --version              # m-cli 0.1.0
-```
-
-Add `~/m-dev-tools/m-cli/.venv/bin` to your `PATH` (or use direnv) so
-the bare `m` command works without the explicit prefix used in the
-transcript below.
-
-### Bootstrap the engine container
-
-```bash
-m engine install                   # docker pull ghcr.io/m-dev-tools/m-test-engine:0.1.0
-m engine start                     # docker run -d -v $HOME/m-work:/m-work ...
-```
-
-The first call pulls the image (~150 MB) from GHCR; the second starts
-a long-running container named `m-test-engine` with `$HOME/m-work`
-bind-mounted at `/m-work`. The bind-mount is the entire point: every
-M project under `~/m-work/` is automatically visible inside the
-container at the matching path, no per-project mount setup.
-
-### Verify
-
-```bash
-mkdir -p ~/m-work                  # bind-mount root
-m doctor                           # all checks should be ✓
-```
-
-If `m doctor` reports anything other than 7 OK, fix that before
-proceeding — every command below depends on the engine being healthy.
-
----
+See the [Getting started guide](m-dev-tools-setup.md) for the
+turnkey-setup-on-a-fresh-host path — prerequisites, install via
+`setup.sh` (or manual), `m doctor` verification, and troubleshooting.
+The walkthrough below assumes a green `m doctor`.
 
 ---
 
@@ -481,12 +411,12 @@ up from cwd looking for `.m-cli.toml`):
 
 ```text
 $ m lint routines/REQSTATS.m tests/REQSTATSTST.m
-routines/REQSTATS.m:13:2: [S] M-MOD-009: Line has 2 commands (limit: 1)
-routines/REQSTATS.m:13:12: [S] M-MOD-031: Magic numeric literal 200 — extract to a named constant
-routines/REQSTATS.m:13:24: [S] M-MOD-031: Magic numeric literal 599 — extract to a named constant
-routines/REQSTATS.m:14:15: [S] M-MOD-031: Magic numeric literal 100 — extract to a named constant
-routines/REQSTATS.m:16:1: [I] M-MOD-029: Label 'aggregate' comment density 6% below threshold 10% (1/15 non-blank lines)
-routines/REQSTATS.m:17:6: [S] M-MOD-032: Single-letter variable 'i' outside FOR loop counter — pick a meaningful name
+routines/REQSTATS.m:13:2: [STYLE] M-MOD-009: Line has 2 commands (limit: 1)
+routines/REQSTATS.m:13:12: [STYLE] M-MOD-031: Magic numeric literal 200 — extract to a named constant
+routines/REQSTATS.m:13:24: [STYLE] M-MOD-031: Magic numeric literal 599 — extract to a named constant
+routines/REQSTATS.m:14:15: [STYLE] M-MOD-031: Magic numeric literal 100 — extract to a named constant
+routines/REQSTATS.m:16:1: [INFO] M-MOD-029: Label 'aggregate' comment density 6% below threshold 10% (1/15 non-blank lines)
+routines/REQSTATS.m:17:6: [STYLE] M-MOD-032: Single-letter variable 'i' outside FOR loop counter — pick a meaningful name
 …
 ```
 
