@@ -231,7 +231,7 @@ Next steps:
 
   3. Read the TDD lifecycle walkthrough — exercises every m subcommand
      end-to-end against a small data-analysis app:
-       $M_DEV_HOME/m-cli/docs/m-cli-tdd-lifecycle-walkthrough.md
+       $M_DEV_HOME/m-cli/docs/m-tdd-lifecycle-walkthrough.md
 
   4. Start a project of your own:
        mkdir -p ~/m-work && cd ~/m-work

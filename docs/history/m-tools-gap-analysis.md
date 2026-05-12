@@ -1,6 +1,6 @@
-# M Tools — Gap Analysis (Vendor-Neutral)
+# M Tools — Gap Analysis (Vendor Neutral)
 
-> **Archived snapshot.** Imported verbatim from [`m-tools`](https://github.com/rafael5/m-tools) — source commit [`16fe3f7`](https://github.com/rafael5/m-tools/commit/16fe3f7dc6982070809cd1d8290d01fedc5905ac) (2026-04-27), at the point that repo seeded the rest of the m-dev-tools org (it has since been moved out of the org back to its original author's account). Preserved for the design rationale behind the m-dev-tools ecosystem (Go/Rust/Python toolchain analogy that drove `m-cli`'s CLI ergonomics). **Not maintained.** For the *current* shape of the org, start at [`profile/README.md`](../../profile/README.md).
+> **History** For the *current* shape of the M Developer Tools, start at [`profile/README.md`](../../profile/README.md).
 
 **Document type:** Reference / strategic planning
 **Scope:** Developer toolchain for the M (MUMPS) programming language across all current implementations
@@ -45,6 +45,10 @@
   - [6.4 The bottom line](#64-the-bottom-line)
 - [7. Consolidated Gap Analysis](#7-consolidated-gap-analysis)
 - [8. Rank-Ordered Developer Impact: Where to Invest First](#8-rank-ordered-developer-impact-where-to-invest-first)
+  - [Tier 1 — The development loop (transformative impact)](#tier-1--the-development-loop-transformative-impact)
+  - [Tier 2 — Quality gates and team scaling (high impact)](#tier-2--quality-gates-and-team-scaling-high-impact)
+  - [Tier 3 — Maintenance and ecosystem (medium impact)](#tier-3--maintenance-and-ecosystem-medium-impact)
+  - [Tier 4 — Specialised or quality-of-life (lower impact)](#tier-4--specialised-or-quality-of-life-lower-impact)
 
 ---
 
