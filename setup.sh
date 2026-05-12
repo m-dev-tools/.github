@@ -96,6 +96,16 @@ case "$OS" in
     fail "Unsupported OS. m-dev-tools targets Linux (apt/dnf/pacman) and macOS." ;;
 esac
 
+# ── arch detection ───────────────────────────────────────────────────
+ARCH_RAW=$(uname -m)
+case "$ARCH_RAW" in
+  arm64|aarch64) ARCH=arm64 ;;
+  x86_64|amd64)  ARCH=amd64 ;;
+  *) ARCH="$ARCH_RAW"
+     warn "Unknown arch: $ARCH_RAW — proceeding without arch compatibility check" ;;
+esac
+info "Detected arch: $ARCH"
+
 install_hint() {
   # Print a one-line install hint for the given package on the detected OS.
   local pkg="$1"
@@ -128,7 +138,7 @@ else
   warn "docker not found."
   case "$OS" in
     debian) install_hint docker.io ;;
-    macos)  printf '  brew install --cask docker  # then launch Docker Desktop\n' ;;
+    macos)  printf '  brew install --cask docker-desktop  # then launch Docker Desktop\n' ;;
     *)      install_hint docker ;;
   esac
   missing=1
@@ -194,6 +204,34 @@ fi
 
 if (( missing )); then
   fail "fix the prerequisites above, then re-run setup.sh."
+fi
+
+# ── engine-image arch compatibility ──────────────────────────────────
+# The bootstrap will pull ghcr.io/m-dev-tools/m-test-engine. If that image
+# has no manifest entry for the host arch, surface it now and pin the
+# platform so Docker runs the amd64 image under emulation rather than
+# failing mid-bootstrap with a cryptic "no matching manifest" error.
+ENGINE_IMAGE="ghcr.io/m-dev-tools/m-test-engine:0.1.0"
+if [[ "$ARCH" == "arm64" || "$ARCH" == "amd64" ]]; then
+  info "Checking engine image manifest for $ARCH..."
+  if manifest=$(docker manifest inspect "$ENGINE_IMAGE" 2>/dev/null); then
+    if printf '%s' "$manifest" | grep -q "\"architecture\": \"$ARCH\""; then
+      ok "engine image $ENGINE_IMAGE has $ARCH manifest"
+    else
+      warn "Engine image $ENGINE_IMAGE has no $ARCH manifest."
+      warn "Setting DOCKER_DEFAULT_PLATFORM=linux/amd64 — engine will run under emulation."
+      export DOCKER_DEFAULT_PLATFORM=linux/amd64
+      if (( ! NONINTERACTIVE )); then
+        read -r -p "Continue with linux/amd64 emulation? [Y/n]: " reply
+        case "${reply:-Y}" in
+          [Nn]*) fail "aborted by user. Re-run once a native $ARCH image is published." ;;
+        esac
+      fi
+    fi
+  else
+    warn "Could not inspect $ENGINE_IMAGE manifest — skipping arch compatibility check."
+    warn "If the bootstrap fails with 'no matching manifest', re-run with: DOCKER_DEFAULT_PLATFORM=linux/amd64 bash setup.sh"
+  fi
 fi
 
 # ── confirm install location ─────────────────────────────────────────
