@@ -1,6 +1,6 @@
 # M Tools — Gap Analysis (Vendor-Neutral)
 
-> **Archived snapshot.** Imported verbatim from [`m-dev-tools/m-tools`](https://github.com/m-dev-tools/m-tools) — source commit [`16fe3f7`](https://github.com/m-dev-tools/m-tools/commit/16fe3f7dc6982070809cd1d8290d01fedc5905ac) (2026-04-27), before that repo was archived. Preserved for the design rationale behind the m-dev-tools ecosystem (Go/Rust/Python toolchain analogy that drove `m-cli`'s CLI ergonomics). **Not maintained.** For the *current* shape of the org, start at [`profile/README.md`](../../profile/README.md).
+> **Archived snapshot.** Imported verbatim from [`m-tools`](https://github.com/rafael5/m-tools) — source commit [`16fe3f7`](https://github.com/rafael5/m-tools/commit/16fe3f7dc6982070809cd1d8290d01fedc5905ac) (2026-04-27), at the point that repo seeded the rest of the m-dev-tools org (it has since been moved out of the org back to its original author's account). Preserved for the design rationale behind the m-dev-tools ecosystem (Go/Rust/Python toolchain analogy that drove `m-cli`'s CLI ergonomics). **Not maintained.** For the *current* shape of the org, start at [`profile/README.md`](../../profile/README.md).
 
 **Document type:** Reference / strategic planning
 **Scope:** Developer toolchain for the M (MUMPS) programming language across all current implementations

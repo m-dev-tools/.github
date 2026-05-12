@@ -55,5 +55,6 @@ each done-criterion green.
   `profile/build/`.
 - Recipes. Those are mechanically-runnable Markdown files under
   [`../recipes/`](../recipes/), gated by `make recipes-check`.
-- Org history / archived projects. That's [`../history/`](../history/) —
-  e.g. the m-tools archive.
+- Org history / retired or moved-out projects. That's
+  [`../history/`](../history/) — e.g. the m-tools rehost (the source repo
+  now lives at [`rafael5/m-tools`](https://github.com/rafael5/m-tools)).
