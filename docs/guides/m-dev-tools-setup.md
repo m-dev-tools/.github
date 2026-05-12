@@ -98,7 +98,7 @@ assumes these invariants.
 
 1. **TDD walkthrough.** Exercise every `m` subcommand end-to-end
    against a small data-analysis app:
-   `~/m-dev-tools/m-cli/docs/m-cli-tdd-lifecycle-walkthrough.md`.
+   `~/m-dev-tools/m-cli/docs/m-tdd-lifecycle-walkthrough.md`.
 2. **Start your own project.**
 
    ```bash

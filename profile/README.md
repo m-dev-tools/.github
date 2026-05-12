@@ -194,6 +194,16 @@ less ./setup.sh
 bash ./setup.sh
 ```
 
+## Example of Modern M Test-Driven Development and M Standard Library
+
+The [m-cli TDD lifecycle walkthrough](https://github.com/m-dev-tools/m-cli/blob/main/docs/m-tdd-lifecycle-walkthrough.md)
+is an end-to-end transcript of building a small data-analysis app —
+`reqstats`, an HTTP-access-log summarizer — using only the `m`
+toolchain and `m-stdlib`. Exercises every `m <subcommand>` (fmt /
+lint / test / coverage / watch / lsp / new / run / build / ci) and
+the standard library it consumes. The fastest way to see a modern
+M inner loop in action on a clean host.
+
 ## Licensing
 
 Most repos are **AGPL-3.0**, the two VS Code extensions are **MIT** to
